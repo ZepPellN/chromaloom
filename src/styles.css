@@ -48,6 +48,7 @@ label.button {
 }
 
 button:focus-visible,
+a:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
@@ -109,6 +110,12 @@ h3 {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.export-status {
+  margin: -10px 4px 14px;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .button {

@@ -31,8 +31,16 @@ function App() {
   const [loadedImages, setLoadedImages] = useState<Record<string, LoadedImage>>({});
   const [isProcessing, setIsProcessing] = useState(false);
   const [status, setStatus] = useState("Upload one image to start.");
+  const [exportStatus, setExportStatus] = useState("");
+  const [readyDownload, setReadyDownload] = useState<{ url: string; fileName: string } | null>(null);
 
   const selected = useMemo(() => items.find((item) => item.id === selectedId) ?? items[0], [items, selectedId]);
+
+  useEffect(() => {
+    return () => {
+      if (readyDownload) URL.revokeObjectURL(readyDownload.url);
+    };
+  }, [readyDownload]);
 
   async function handleFiles(files: FileList | null) {
     if (!files?.length) return;
@@ -92,21 +100,35 @@ function App() {
     });
   }
 
-  async function exportSelected() {
+  function exportSelected() {
     if (!selected) return;
-    const blob = await renderToBlob(selected, loadedImages[selected.id]);
-    downloadBlob(blob, `${sanitizeFileName(selected.title || selected.fileName)}-poster.png`);
+    const image = loadedImages[selected.id];
+    if (!image) {
+      setExportStatus("Image is still loading. Try again in a moment.");
+      return;
+    }
+
+    const canvas = document.createElement("canvas");
+    renderPoster(canvas, selected, image);
+    downloadDataUrl(canvas.toDataURL("image/png"), `${sanitizeFileName(selected.title || selected.fileName)}-poster.png`);
+    setExportStatus("PNG download started.");
   }
 
   async function exportAll() {
     if (!items.length) return;
+    setExportStatus("Preparing zip...");
+    if (readyDownload) URL.revokeObjectURL(readyDownload.url);
+    setReadyDownload(null);
+
     const zip = new JSZip();
     for (const item of items) {
       const blob = await renderToBlob(item, loadedImages[item.id]);
       zip.file(`${sanitizeFileName(item.title || item.fileName)}-${items.indexOf(item) + 1}.png`, blob);
     }
     const archive = await zip.generateAsync({ type: "blob" });
-    downloadBlob(archive, "colorful-posters.zip");
+    const url = URL.createObjectURL(archive);
+    setReadyDownload({ url, fileName: "colorful-posters.zip" });
+    setExportStatus("Zip is ready. Use the download link below.");
   }
 
   function applyCurrentStyleToAll() {
@@ -147,8 +169,25 @@ function App() {
             <FileArchive size={18} aria-hidden="true" />
             <span>Zip</span>
           </button>
+          {readyDownload ? (
+            <a
+              className="button primary"
+              href={readyDownload.url}
+              download={readyDownload.fileName}
+              onClick={() => {
+                window.setTimeout(() => {
+                  URL.revokeObjectURL(readyDownload.url);
+                  setReadyDownload(null);
+                }, 5_000);
+              }}
+            >
+              <Download size={18} aria-hidden="true" />
+              <span>Ready</span>
+            </a>
+          ) : null}
         </div>
       </section>
+      {exportStatus ? <p className="export-status" role="status">{exportStatus}</p> : null}
 
       <section className="workspace" aria-label="Poster workspace">
         <aside className="side-panel upload-panel">
@@ -467,13 +506,15 @@ function Segmented<T extends string>({ label, value, values, onChange }: {
   );
 }
 
-function downloadBlob(blob: Blob, fileName: string) {
-  const url = URL.createObjectURL(blob);
+function downloadDataUrl(url: string, fileName: string) {
   const anchor = document.createElement("a");
   anchor.href = url;
   anchor.download = fileName;
+  anchor.rel = "noopener";
+  anchor.style.display = "none";
+  document.body.append(anchor);
   anchor.click();
-  URL.revokeObjectURL(url);
+  window.setTimeout(() => anchor.remove(), 0);
 }
 
 export default App;
