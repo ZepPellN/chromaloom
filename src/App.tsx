@@ -38,7 +38,7 @@ function App() {
 
   useEffect(() => {
     return () => {
-      if (readyDownload) URL.revokeObjectURL(readyDownload.url);
+      if (readyDownload) revokeDownloadUrl(readyDownload.url);
     };
   }, [readyDownload]);
 
@@ -110,14 +110,18 @@ function App() {
 
     const canvas = document.createElement("canvas");
     renderPoster(canvas, selected, image);
-    downloadDataUrl(canvas.toDataURL("image/png"), `${sanitizeFileName(selected.title || selected.fileName)}-poster.png`);
-    setExportStatus("PNG download started.");
+    const url = canvas.toDataURL("image/png");
+    const fileName = `${sanitizeFileName(selected.title || selected.fileName)}-poster.png`;
+    if (readyDownload) revokeDownloadUrl(readyDownload.url);
+    setReadyDownload({ url, fileName });
+    downloadDataUrl(url, fileName);
+    setExportStatus("PNG download started. If the browser prompt interrupted it, use the Ready link.");
   }
 
   async function exportAll() {
     if (!items.length) return;
     setExportStatus("Preparing zip...");
-    if (readyDownload) URL.revokeObjectURL(readyDownload.url);
+    if (readyDownload) revokeDownloadUrl(readyDownload.url);
     setReadyDownload(null);
 
     const zip = new JSZip();
@@ -176,7 +180,7 @@ function App() {
               download={readyDownload.fileName}
               onClick={() => {
                 window.setTimeout(() => {
-                  URL.revokeObjectURL(readyDownload.url);
+                  revokeDownloadUrl(readyDownload.url);
                   setReadyDownload(null);
                 }, 5_000);
               }}
@@ -514,7 +518,11 @@ function downloadDataUrl(url: string, fileName: string) {
   anchor.style.display = "none";
   document.body.append(anchor);
   anchor.click();
-  window.setTimeout(() => anchor.remove(), 0);
+  window.setTimeout(() => anchor.remove(), 60_000);
+}
+
+function revokeDownloadUrl(url: string) {
+  if (url.startsWith("blob:")) URL.revokeObjectURL(url);
 }
 
 export default App;

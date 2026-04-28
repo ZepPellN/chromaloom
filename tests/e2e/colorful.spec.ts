@@ -29,4 +29,5 @@ test("creates and exports a poster from an uploaded image", async ({ page }) => 
   const download = await downloadPromise;
 
   expect(download.suggestedFilename()).toContain("山西-青龙寺");
+  await expect(page.getByRole("link", { name: "Ready" })).toBeVisible();
 });
