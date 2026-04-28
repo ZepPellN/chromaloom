@@ -1,4 +1,4 @@
-# PRD: Colorful Poster Maker
+# PRD: Chromaloom Poster Maker
 
 ## Problem Statement
 
@@ -6,7 +6,7 @@ The user wants a lightweight static web tool for turning uploaded images into qu
 
 ## Solution
 
-Colorful is a browser-only poster maker. A user uploads one or up to nine images, each image gets a ranked palette of background candidates, and the app recommends the color most suitable for a large comfortable text field. The user edits a single title, chooses a font treatment, adjusts image fit and color-field height, then exports one PNG or all posters as a zip. The default layout keeps the original image uncropped in Auto mode; template modes allow platform-oriented ratios when needed.
+Chromaloom is a browser-only poster maker. A user uploads one or up to nine images, each image gets a ranked palette of background candidates, and the app recommends the color most suitable for a large comfortable text field. The user edits a single title, chooses a font treatment, adjusts image fit and color-field height, then exports one PNG or all posters as a zip. The default layout keeps the original image uncropped in Auto mode; template modes allow platform-oriented ratios when needed.
 
 ## User Stories
 

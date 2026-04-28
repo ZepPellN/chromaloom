@@ -1,6 +1,6 @@
-# Colorful
+# Chromaloom
 
-Colorful is a lightweight browser-only poster maker. Upload an image, extract comfortable theme colors, place a title on a large color field, keep the original image below it, and export the result as PNG.
+Chromaloom is a lightweight browser-only poster maker. Upload an image, extract comfortable theme colors, place a title on a large color field, keep the original image below it, and export the result as PNG.
 
 ## Features
 

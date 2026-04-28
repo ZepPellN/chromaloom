@@ -1,5 +1,5 @@
 {
-  "name": "colorful",
+  "name": "chromaloom",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -14,7 +14,6 @@
   "dependencies": {
     "@vitejs/plugin-react": "latest",
     "jszip": "latest",
-    "lucide-react": "latest",
     "react": "latest",
     "react-dom": "latest"
   },

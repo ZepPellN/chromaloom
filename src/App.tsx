@@ -1,4 +1,3 @@
-import { Download, FileArchive, ImagePlus, RotateCcw, SlidersHorizontal, Sparkles, Type, Upload } from "lucide-react";
 import JSZip from "jszip";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { readableTextColor } from "./lib/color";
@@ -137,7 +136,7 @@ function App() {
     if (readyDownload) revokeDownloadUrl(readyDownload.url);
     setReadyDownload(null);
 
-    const filePicker = await openSaveFilePicker("colorful-posters.zip", "application/zip", [".zip"]);
+    const filePicker = await openSaveFilePicker("chromaloom-posters.zip", "application/zip", [".zip"]);
     const zip = new JSZip();
     for (const item of items) {
       const blob = await renderToBlob(item, loadedImages[item.id]);
@@ -156,7 +155,7 @@ function App() {
     }
 
     const url = URL.createObjectURL(archive);
-    setReadyDownload({ url, fileName: "colorful-posters.zip" });
+    setReadyDownload({ url, fileName: "chromaloom-posters.zip" });
     setExportStatus("Zip is ready. Use the download link below.");
   }
 
@@ -179,44 +178,18 @@ function App() {
 
   return (
     <main className="app-shell">
-      <section className="masthead" aria-label="Colorful overview">
+      <section className="masthead" aria-label="Chromaloom overview">
         <div>
-          <p className="eyebrow">Local color poster studio</p>
-          <h1>Colorful</h1>
+          <p className="eyebrow">Local photo color studio</p>
+          <h1>Chromaloom</h1>
         </div>
         <div className="masthead-actions">
           <label className="button primary">
-            <Upload size={18} aria-hidden="true" />
-            <span>Upload</span>
+            <span>Upload images</span>
             <input type="file" accept="image/*" multiple onChange={(event) => void handleFiles(event.target.files)} />
           </label>
-          <button className="button" type="button" onClick={() => void exportSelected()} disabled={!selected}>
-            <Download size={18} aria-hidden="true" />
-            <span>PNG</span>
-          </button>
-          <button className="button" type="button" onClick={() => void exportAll()} disabled={items.length === 0}>
-            <FileArchive size={18} aria-hidden="true" />
-            <span>Zip</span>
-          </button>
-          {readyDownload ? (
-            <a
-              className="button primary"
-              href={readyDownload.url}
-              download={readyDownload.fileName}
-              onClick={() => {
-                window.setTimeout(() => {
-                  revokeDownloadUrl(readyDownload.url);
-                  setReadyDownload(null);
-                }, 5_000);
-              }}
-            >
-              <Download size={18} aria-hidden="true" />
-              <span>Ready</span>
-            </a>
-          ) : null}
         </div>
       </section>
-      {exportStatus ? <p className="export-status" role="status">{exportStatus}</p> : null}
 
       <section className="workspace" aria-label="Poster workspace">
         <aside className="side-panel upload-panel">
@@ -233,7 +206,6 @@ function App() {
             />
           ) : (
             <div className="empty-preview">
-              <ImagePlus size={42} aria-hidden="true" />
               <p>Drop in a mural, temple detail, travel photo, or any image with a color mood worth keeping.</p>
             </div>
           )}
@@ -246,6 +218,11 @@ function App() {
               onChange={updateSelected}
               onRemove={removeSelected}
               onApplyAll={applyCurrentStyleToAll}
+              onExportPng={exportSelected}
+              onExportAll={exportAll}
+              readyDownload={readyDownload}
+              exportStatus={exportStatus}
+              clearReadyDownload={() => setReadyDownload(null)}
             />
           ) : (
             <div className="quiet-note">Controls appear after the first upload.</div>
@@ -264,11 +241,9 @@ function UploadPanel({ count, isProcessing, status, onFiles }: {
 }) {
   return (
     <div className="drop-zone">
-      <Sparkles size={18} aria-hidden="true" />
       <h2>Images</h2>
       <p>{status}</p>
       <label className="button ghost full">
-        <ImagePlus size={17} aria-hidden="true" />
         <span>{isProcessing ? "Reading colors" : count ? "Add more" : "Choose images"}</span>
         <input type="file" accept="image/*" multiple onChange={(event) => void onFiles(event.target.files)} />
       </label>
@@ -361,17 +336,58 @@ function PosterPreview({ item, image, onChange }: {
   );
 }
 
-function Controls({ item, onChange, onRemove, onApplyAll }: {
+function Controls({
+  item,
+  onChange,
+  onRemove,
+  onApplyAll,
+  onExportPng,
+  onExportAll,
+  readyDownload,
+  exportStatus,
+  clearReadyDownload,
+}: {
   item: PosterItem;
   onChange: (item: PosterItem) => void;
   onRemove: () => void;
   onApplyAll: () => void;
+  onExportPng: () => Promise<void>;
+  onExportAll: () => Promise<void>;
+  readyDownload: { url: string; fileName: string } | null;
+  exportStatus: string;
+  clearReadyDownload: () => void;
 }) {
   return (
     <div className="controls">
+      <div className="export-dock" aria-label="Export actions">
+        <div>
+          <p className="eyebrow">Export</p>
+          <h2>Ready when the frame is right.</h2>
+        </div>
+        <div className="export-actions">
+          <button className="button primary" type="button" onClick={() => void onExportPng()}>PNG</button>
+          <button className="button" type="button" onClick={() => void onExportAll()}>Zip</button>
+          {readyDownload ? (
+            <a
+              className="button primary"
+              href={readyDownload.url}
+              download={readyDownload.fileName}
+              onClick={() => {
+                window.setTimeout(() => {
+                  revokeDownloadUrl(readyDownload.url);
+                  clearReadyDownload();
+                }, 5_000);
+              }}
+            >
+              Ready
+            </a>
+          ) : null}
+        </div>
+        {exportStatus ? <p className="export-status" role="status">{exportStatus}</p> : null}
+      </div>
+
       <div className="control-title">
-        <SlidersHorizontal size={18} aria-hidden="true" />
-        <h2>Adjust</h2>
+        <h2>Poster settings</h2>
       </div>
 
       <label className="field">
@@ -451,14 +467,12 @@ function Controls({ item, onChange, onRemove, onApplyAll }: {
             type="button"
             onClick={() => onChange({ ...item, imageTransform: { x: 0, y: 0, scale: 1 } })}
           >
-            <RotateCcw size={16} aria-hidden="true" />
             Reset crop
           </button>
         </div>
       ) : null}
 
       <div className="control-title small">
-        <Type size={17} aria-hidden="true" />
         <h3>Type</h3>
       </div>
 

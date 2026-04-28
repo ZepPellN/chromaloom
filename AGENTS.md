@@ -2,7 +2,7 @@
 
 ## Project Goal
 
-Build Colorful as a pure front-end poster maker for GitHub Pages. The product should stay lightweight, local-first, and useful for quickly turning uploaded images into editorial color posters.
+Build Chromaloom as a pure front-end poster maker for GitHub Pages. The product should stay lightweight, local-first, and useful for quickly turning uploaded images into editorial color posters.
 
 ## Product Vocabulary
 
@@ -24,4 +24,4 @@ Build Colorful as a pure front-end poster maker for GitHub Pages. The product sh
 
 ## UI Direction
 
-Use a quiet editorial workspace: light warm canvas, restrained controls, crisp serif poster typography, and no decorative gradients. The UI should feel like a compact tool, while the exported poster carries the visual drama.
+Use a minimalist photo-workspace interface: warm monochrome surfaces, crisp borders, restrained controls, and a dark preview well that keeps attention on the image. The exported poster carries the visual drama.
