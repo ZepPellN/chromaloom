@@ -100,7 +100,7 @@ function App() {
     });
   }
 
-  function exportSelected() {
+  async function exportSelected() {
     if (!selected) return;
     const image = loadedImages[selected.id];
     if (!image) {
@@ -110,11 +110,24 @@ function App() {
 
     const canvas = document.createElement("canvas");
     renderPoster(canvas, selected, image);
-    const url = canvas.toDataURL("image/png");
     const fileName = `${sanitizeFileName(selected.title || selected.fileName)}-poster.png`;
+    const filePicker = await openSaveFilePicker(fileName, "image/png", [".png"]);
+    const blob = await canvasToBlob(canvas, "image/png");
+
+    if (filePicker) {
+      if (filePicker === "cancelled") {
+        setExportStatus("PNG save cancelled.");
+        return;
+      }
+      await writeBlobToFile(filePicker, blob);
+      setExportStatus("PNG saved.");
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
     if (readyDownload) revokeDownloadUrl(readyDownload.url);
     setReadyDownload({ url, fileName });
-    downloadDataUrl(url, fileName);
+    downloadBlobUrl(url, fileName);
     setExportStatus("PNG download started. If the browser prompt interrupted it, use the Ready link.");
   }
 
@@ -124,12 +137,24 @@ function App() {
     if (readyDownload) revokeDownloadUrl(readyDownload.url);
     setReadyDownload(null);
 
+    const filePicker = await openSaveFilePicker("colorful-posters.zip", "application/zip", [".zip"]);
     const zip = new JSZip();
     for (const item of items) {
       const blob = await renderToBlob(item, loadedImages[item.id]);
       zip.file(`${sanitizeFileName(item.title || item.fileName)}-${items.indexOf(item) + 1}.png`, blob);
     }
     const archive = await zip.generateAsync({ type: "blob" });
+
+    if (filePicker) {
+      if (filePicker === "cancelled") {
+        setExportStatus("Zip save cancelled.");
+        return;
+      }
+      await writeBlobToFile(filePicker, archive);
+      setExportStatus("Zip saved.");
+      return;
+    }
+
     const url = URL.createObjectURL(archive);
     setReadyDownload({ url, fileName: "colorful-posters.zip" });
     setExportStatus("Zip is ready. Use the download link below.");
@@ -510,7 +535,7 @@ function Segmented<T extends string>({ label, value, values, onChange }: {
   );
 }
 
-function downloadDataUrl(url: string, fileName: string) {
+function downloadBlobUrl(url: string, fileName: string) {
   const anchor = document.createElement("a");
   anchor.href = url;
   anchor.download = fileName;
@@ -523,6 +548,47 @@ function downloadDataUrl(url: string, fileName: string) {
 
 function revokeDownloadUrl(url: string) {
   if (url.startsWith("blob:")) URL.revokeObjectURL(url);
+}
+
+async function canvasToBlob(canvas: HTMLCanvasElement, type: string): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) resolve(blob);
+      else reject(new Error("Could not export poster."));
+    }, type);
+  });
+}
+
+async function openSaveFilePicker(fileName: string, mimeType: string, extensions: string[]) {
+  const pickerWindow = window as Window & {
+    showSaveFilePicker?: (options: {
+      suggestedName: string;
+      types: Array<{ description: string; accept: Record<string, string[]> }>;
+    }) => Promise<FileSystemFileHandle>;
+  };
+
+  if (navigator.webdriver || typeof pickerWindow.showSaveFilePicker !== "function") {
+    return null;
+  }
+
+  try {
+    return await pickerWindow.showSaveFilePicker({
+      suggestedName: fileName,
+      types: [{ description: fileName, accept: { [mimeType]: extensions } }],
+    });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      return "cancelled" as const;
+    }
+    throw error;
+  }
+}
+
+async function writeBlobToFile(fileHandle: FileSystemFileHandle | "cancelled", blob: Blob) {
+  if (fileHandle === "cancelled") return;
+  const writable = await fileHandle.createWritable();
+  await writable.write(blob);
+  await writable.close();
 }
 
 export default App;
