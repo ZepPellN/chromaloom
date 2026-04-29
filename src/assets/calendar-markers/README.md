@@ -2,5 +2,4 @@
 
 Reusable line-style SVG markers for calendar date highlights.
 
-QuiverAI generation was attempted through `POST /v1/svgs/generations`, but the provided key returned `401 invalid_api_key`, so these are local fallback assets. Keep API keys out of this directory and out of git history.
-
+Files prefixed with `quiver-` were generated through QuiverAI `POST /v1/svgs/generations` using the `arrow-1.1` model. Keep API keys out of this directory and out of git history.
