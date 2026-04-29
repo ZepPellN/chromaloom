@@ -8,6 +8,7 @@ describe("poster layout", () => {
       naturalHeight: 1500,
       layoutMode: "auto",
       fieldMode: "balanced",
+      colorPosition: "auto",
     });
 
     expect(layout.colorPlacement).toBe("right");
@@ -22,6 +23,7 @@ describe("poster layout", () => {
       naturalHeight: 900,
       layoutMode: "auto",
       fieldMode: "balanced",
+      colorPosition: "auto",
     });
 
     expect(layout.colorPlacement).toBe("top");
@@ -36,6 +38,7 @@ describe("poster layout", () => {
       naturalHeight: 5300,
       layoutMode: "16:9",
       fieldMode: "balanced",
+      colorPosition: "auto",
     });
 
     expect(layout.width / layout.height).toBeCloseTo(16 / 9, 2);
@@ -50,12 +53,54 @@ describe("poster layout", () => {
       naturalHeight: 5300,
       layoutMode: "4:5",
       fieldMode: "balanced",
+      colorPosition: "auto",
     });
 
     expect(layout.width / layout.height).toBeCloseTo(4 / 5, 2);
     expect(layout.imageArea.width / layout.imageArea.height).toBeCloseTo(7956 / 5300, 2);
     expect(layout.colorPlacement).toBe("top");
     expect(layout.colorField.y).toBe(0);
+  });
+
+  it("honors manual bottom and left color positions in auto layout", () => {
+    const bottom = getPosterLayout({
+      naturalWidth: 1600,
+      naturalHeight: 900,
+      layoutMode: "auto",
+      fieldMode: "balanced",
+      colorPosition: "bottom",
+    });
+    const left = getPosterLayout({
+      naturalWidth: 1000,
+      naturalHeight: 1500,
+      layoutMode: "auto",
+      fieldMode: "balanced",
+      colorPosition: "left",
+    });
+
+    expect(bottom.colorPlacement).toBe("bottom");
+    expect(bottom.imageArea.y).toBe(0);
+    expect(bottom.colorField.y).toBe(bottom.imageArea.height);
+    expect(bottom.imageArea.width / bottom.imageArea.height).toBeCloseTo(1600 / 900, 2);
+
+    expect(left.colorPlacement).toBe("left");
+    expect(left.colorField.x).toBe(0);
+    expect(left.imageArea.x).toBe(left.colorField.width);
+    expect(left.imageArea.width / left.imageArea.height).toBeCloseTo(1000 / 1500, 2);
+  });
+
+  it("keeps manual placement when a frame preset cannot match that side", () => {
+    const layout = getPosterLayout({
+      naturalWidth: 1600,
+      naturalHeight: 900,
+      layoutMode: "16:9",
+      fieldMode: "balanced",
+      colorPosition: "top",
+    });
+
+    expect(layout.colorPlacement).toBe("top");
+    expect(layout.imageArea.width / layout.imageArea.height).toBeCloseTo(1600 / 900, 2);
+    expect(layout.width / layout.height).toBeLessThan(16 / 9);
   });
 
   it("fits source rectangles using contain and cover", () => {

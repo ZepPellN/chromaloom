@@ -28,6 +28,7 @@ describe("poster state", () => {
     expect(item.themeColor).toBe("#889976");
     expect(item.fitMode).toBe("contain");
     expect(item.layoutMode).toBe("auto");
+    expect(item.colorPosition).toBe("auto");
   });
 
   it("applies style without replacing image-specific palette", () => {
@@ -49,10 +50,11 @@ describe("poster state", () => {
       palette: [{ ...palette[0], hex: "#2d314b" }],
     });
 
-    const next = applyStyleFrom({ ...source, fieldMode: "poster" }, target);
+    const next = applyStyleFrom({ ...source, fieldMode: "poster", colorPosition: "bottom" }, target);
 
     expect(next.title).toBe("山西");
     expect(next.fieldMode).toBe("poster");
+    expect(next.colorPosition).toBe("bottom");
     expect(next.palette[0].hex).toBe("#2d314b");
   });
 

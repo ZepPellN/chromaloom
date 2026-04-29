@@ -7,6 +7,7 @@ import {
   DEFAULT_FONT,
   MAX_BATCH,
   applyStyleFrom,
+  colorPositions,
   createPosterItem,
   fieldModes,
   fitModes,
@@ -15,7 +16,7 @@ import {
   textColorModes,
   updatePosterSetting,
 } from "./lib/posterState";
-import type { FieldMode, FitMode, LayoutMode, LoadedImage, PosterItem, TextColorMode } from "./types";
+import type { ColorPosition, FieldMode, FitMode, LayoutMode, LoadedImage, PosterItem, TextColorMode } from "./types";
 
 const FONT_OPTIONS = [
   { label: "Songti", value: DEFAULT_FONT },
@@ -517,6 +518,13 @@ function Controls({
         value={item.fieldMode}
         values={fieldModes}
         onChange={(value) => onChange(updatePosterSetting(item, "fieldMode", value))}
+      />
+
+      <Segmented<ColorPosition>
+        label="Color position"
+        value={item.colorPosition}
+        values={colorPositions}
+        onChange={(value) => onChange(updatePosterSetting(item, "colorPosition", value))}
       />
 
       <Segmented<FitMode>

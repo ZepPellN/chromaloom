@@ -1,4 +1,4 @@
-import type { FieldMode, FitMode, LayoutMode, PosterItem, PosterSettings, TextColorMode, ThemeColor } from "../types";
+import type { ColorPosition, FieldMode, FitMode, LayoutMode, PosterItem, PosterSettings, TextColorMode, ThemeColor } from "../types";
 
 export const MAX_BATCH = 9;
 
@@ -26,6 +26,7 @@ export function createPosterItem(input: {
     title: input.title ?? "",
     layoutMode: "auto",
     fieldMode: "balanced",
+    colorPosition: "auto",
     fitMode: "contain",
     textColorMode: "auto",
     fontFamily: DEFAULT_FONT,
@@ -41,6 +42,7 @@ export function applyStyleFrom(source: PosterItem, target: PosterItem): PosterIt
     title: source.title,
     layoutMode: source.layoutMode,
     fieldMode: source.fieldMode,
+    colorPosition: source.colorPosition,
     fitMode: source.fitMode,
     textColorMode: source.textColorMode,
     fontFamily: source.fontFamily,
@@ -62,6 +64,7 @@ export function sanitizeFileName(name: string): string {
 
 export const layoutModes: LayoutMode[] = ["auto", "4:5", "1:1", "9:16", "16:9", "3:4", "2:3"];
 export const fieldModes: FieldMode[] = ["compact", "balanced", "poster"];
+export const colorPositions: ColorPosition[] = ["auto", "top", "bottom", "left", "right"];
 export const fitModes: FitMode[] = ["contain", "cover"];
 export const textColorModes: TextColorMode[] = ["auto", "ink", "paper"];
 

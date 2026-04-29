@@ -8,7 +8,7 @@ Build Chromaloom as a pure front-end poster maker for GitHub Pages. The product 
 
 - **Poster**: The exportable composition containing a color area and the source image.
 - **Theme color**: A ranked color candidate extracted from the source image and suitable for a large background.
-- **Color area**: The area filled with the selected theme color. It sits above landscape or square photos and to the right of portrait photos in Auto layout.
+- **Color area**: The area filled with the selected theme color. It can sit above, below, left, or right of the source image; Auto places it above landscape or square photos and to the right of portrait photos.
 - **Source image**: The uploaded image rendered without distortion.
 - **Auto layout**: A layout mode that preserves the source image ratio and derives the export frame from the image orientation.
 - **Template layout**: A fixed export frame such as 4:5, 1:1, 9:16, 16:9, 3:4, or 2:3. The whole poster frame changes while the source image area keeps the image's original ratio.
@@ -18,6 +18,7 @@ Build Chromaloom as a pure front-end poster maker for GitHub Pages. The product 
 - Keep image processing in the browser. Do not add a backend unless the product direction changes.
 - Keep preview and export visually consistent by using shared layout and rendering code.
 - Use the Web Share API for mobile-friendly single-poster sharing, with a Ready download link as fallback.
+- Keep manual color-position controls secondary to image integrity: the source image area must preserve the original ratio.
 - Prefer small, testable pure modules for color extraction, poster layout, and state transforms.
 - Keep batch processing capped at nine images unless performance is explicitly revisited.
 - Use conventional commits: `feat`, `fix`, `docs`, `chore`, `test`.

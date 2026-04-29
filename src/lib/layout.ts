@@ -1,4 +1,4 @@
-import type { FieldMode, LayoutMode, PosterItem, PosterLayout, Rect } from "../types";
+import type { ColorPosition, FieldMode, LayoutMode, PosterItem, PosterLayout, Rect } from "../types";
 
 const TEMPLATE_RATIOS: Record<Exclude<LayoutMode, "auto">, number> = {
   "4:5": 4 / 5,
@@ -16,13 +16,14 @@ const FIELD_TO_IMAGE: Record<FieldMode, number> = {
 };
 
 const BASE_LONG_EDGE = 1800;
+type ColorPlacement = Exclude<ColorPosition, "auto">;
 
-export function getPosterLayout(item: Pick<PosterItem, "naturalWidth" | "naturalHeight" | "layoutMode" | "fieldMode">): PosterLayout {
+export function getPosterLayout(item: Pick<PosterItem, "naturalWidth" | "naturalHeight" | "layoutMode" | "fieldMode" | "colorPosition">): PosterLayout {
   if (item.layoutMode === "auto") {
     return getAutoLayout(item);
   }
 
-  return getTemplateLayout(item.layoutMode, item.naturalWidth, item.naturalHeight);
+  return getTemplateLayout(item.layoutMode, item.naturalWidth, item.naturalHeight, item.fieldMode, item.colorPosition);
 }
 
 export function fitRect(sourceWidth: number, sourceHeight: number, target: Rect, mode: "contain" | "cover", scale = 1, offsetX = 0, offsetY = 0): Rect {
@@ -43,41 +44,81 @@ export function fitRect(sourceWidth: number, sourceHeight: number, target: Rect,
   };
 }
 
-function getAutoLayout(item: Pick<PosterItem, "naturalWidth" | "naturalHeight" | "fieldMode">): PosterLayout {
-  const isLandscape = item.naturalWidth >= item.naturalHeight;
-  if (isLandscape) {
-    const width = 1920;
-    const imageHeight = Math.round(width * (item.naturalHeight / item.naturalWidth));
-    const fieldHeight = Math.round(imageHeight * FIELD_TO_IMAGE[item.fieldMode]);
-    return buildTopLayout(width, fieldHeight + imageHeight, fieldHeight);
-  }
-
-  const height = 1800;
-  const imageWidth = Math.round(height * (item.naturalWidth / item.naturalHeight));
-  const fieldWidth = Math.round(imageWidth * FIELD_TO_IMAGE[item.fieldMode]);
-  return buildRightLayout(imageWidth + fieldWidth, height, fieldWidth);
+function getAutoLayout(item: Pick<PosterItem, "naturalWidth" | "naturalHeight" | "fieldMode" | "colorPosition">): PosterLayout {
+  return buildNaturalLayout(item, resolvePlacement(item.colorPosition, item.naturalWidth, item.naturalHeight));
 }
 
-function getTemplateLayout(layoutMode: Exclude<LayoutMode, "auto">, sourceWidth: number, sourceHeight: number): PosterLayout {
+function getTemplateLayout(
+  layoutMode: Exclude<LayoutMode, "auto">,
+  sourceWidth: number,
+  sourceHeight: number,
+  fieldMode: FieldMode,
+  colorPosition: ColorPosition,
+): PosterLayout {
   const targetRatio = TEMPLATE_RATIOS[layoutMode];
   const sourceRatio = sourceWidth / sourceHeight;
+  const placement = resolveTemplatePlacement(colorPosition, targetRatio, sourceRatio);
 
-  if (targetRatio <= sourceRatio) {
+  if ((placement === "top" || placement === "bottom") && targetRatio <= sourceRatio) {
     const width = targetRatio >= 1 ? BASE_LONG_EDGE : Math.round(BASE_LONG_EDGE * targetRatio);
     const imageHeight = Math.round(width / sourceRatio);
     const height = Math.round(width / targetRatio);
-    return buildTopLayout(width, height, height - imageHeight);
+    return buildVerticalLayout(placement, width, height, height - imageHeight);
   }
 
-  const height = targetRatio >= 1 ? Math.round(BASE_LONG_EDGE / targetRatio) : BASE_LONG_EDGE;
-  const imageWidth = Math.round(height * sourceRatio);
-  const width = Math.round(height * targetRatio);
-  return buildRightLayout(width, height, width - imageWidth);
+  if ((placement === "left" || placement === "right") && targetRatio >= sourceRatio) {
+    const height = targetRatio >= 1 ? Math.round(BASE_LONG_EDGE / targetRatio) : BASE_LONG_EDGE;
+    const imageWidth = Math.round(height * sourceRatio);
+    const width = Math.round(height * targetRatio);
+    return buildHorizontalLayout(placement, width, height, width - imageWidth);
+  }
+
+  return buildNaturalLayout({ naturalWidth: sourceWidth, naturalHeight: sourceHeight, fieldMode, colorPosition }, placement);
 }
 
-function buildTopLayout(width: number, height: number, fieldHeight: number): PosterLayout {
-  const colorField = { x: 0, y: 0, width, height: fieldHeight };
-  const imageArea = { x: 0, y: fieldHeight, width, height: height - fieldHeight };
+function buildNaturalLayout(
+  item: Pick<PosterItem, "naturalWidth" | "naturalHeight" | "fieldMode" | "colorPosition">,
+  placement: ColorPlacement,
+): PosterLayout {
+  const sourceRatio = item.naturalWidth / item.naturalHeight;
+
+  if (placement === "top" || placement === "bottom") {
+    const width = 1920;
+    const imageHeight = Math.round(width / sourceRatio);
+    const fieldHeight = Math.round(imageHeight * FIELD_TO_IMAGE[item.fieldMode]);
+    return buildVerticalLayout(placement, width, fieldHeight + imageHeight, fieldHeight);
+  }
+
+  const height = 1800;
+  const imageWidth = Math.round(height * sourceRatio);
+  const fieldWidth = Math.round(imageWidth * FIELD_TO_IMAGE[item.fieldMode]);
+  return buildHorizontalLayout(placement, imageWidth + fieldWidth, height, fieldWidth);
+}
+
+function resolvePlacement(colorPosition: ColorPosition, sourceWidth: number, sourceHeight: number): ColorPlacement {
+  if (colorPosition !== "auto") return colorPosition;
+  return sourceWidth >= sourceHeight ? "top" : "right";
+}
+
+function resolveTemplatePlacement(colorPosition: ColorPosition, targetRatio: number, sourceRatio: number): ColorPlacement {
+  if (colorPosition !== "auto") return colorPosition;
+  return targetRatio <= sourceRatio ? "top" : "right";
+}
+
+function buildVerticalLayout(placement: "top" | "bottom", width: number, height: number, fieldHeight: number): PosterLayout {
+  const normalizedFieldHeight = Math.max(0, fieldHeight);
+  const colorField = {
+    x: 0,
+    y: placement === "top" ? 0 : height - normalizedFieldHeight,
+    width,
+    height: normalizedFieldHeight,
+  };
+  const imageArea = {
+    x: 0,
+    y: placement === "top" ? normalizedFieldHeight : 0,
+    width,
+    height: height - normalizedFieldHeight,
+  };
   return {
     width,
     height,
@@ -87,13 +128,24 @@ function buildTopLayout(width: number, height: number, fieldHeight: number): Pos
       x: colorField.width / 2,
       y: colorField.y + colorField.height / 2,
     },
-    colorPlacement: "top",
+    colorPlacement: placement,
   };
 }
 
-function buildRightLayout(width: number, height: number, fieldWidth: number): PosterLayout {
-  const imageArea = { x: 0, y: 0, width: width - fieldWidth, height };
-  const colorField = { x: imageArea.width, y: 0, width: fieldWidth, height };
+function buildHorizontalLayout(placement: "left" | "right", width: number, height: number, fieldWidth: number): PosterLayout {
+  const normalizedFieldWidth = Math.max(0, fieldWidth);
+  const colorField = {
+    x: placement === "left" ? 0 : width - normalizedFieldWidth,
+    y: 0,
+    width: normalizedFieldWidth,
+    height,
+  };
+  const imageArea = {
+    x: placement === "left" ? normalizedFieldWidth : 0,
+    y: 0,
+    width: width - normalizedFieldWidth,
+    height,
+  };
   return {
     width,
     height,
@@ -103,6 +155,6 @@ function buildRightLayout(width: number, height: number, fieldWidth: number): Po
       x: colorField.x + colorField.width / 2,
       y: colorField.height / 2,
     },
-    colorPlacement: "right",
+    colorPlacement: placement,
   };
 }

@@ -53,6 +53,10 @@ test("creates and exports a poster from an uploaded image", async ({ page }) => 
   });
   expect(canvasRatio.intrinsic).toBeGreaterThan(1);
   expect(canvasRatio.displayed).toBeCloseTo(canvasRatio.intrinsic, 1);
+  const positionControls = page.locator("fieldset").filter({ hasText: "Color position" });
+  await expect(positionControls).toBeVisible();
+  await positionControls.getByRole("button", { name: "bottom" }).click();
+  await expect(positionControls.getByRole("button", { name: "bottom" })).toHaveClass(/active/);
 
   await page.getByLabel("Title").fill("山西·青龙寺");
   await page.getByRole("button", { name: "4:5" }).click();
