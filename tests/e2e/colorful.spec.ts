@@ -11,13 +11,15 @@ const svg = `
 test("creates and exports a poster from an uploaded image", async ({ page }) => {
   await page.goto("/");
 
-  await page.getByLabel("Choose images").setInputFiles({
+  const fileInput = page.locator(".drop-zone input[type='file']");
+  await fileInput.setInputFiles({
     name: "temple.svg",
     mimeType: "image/svg+xml",
     buffer: Buffer.from(svg),
   });
 
   await expect(page.getByText("Processed 1 image.")).toBeVisible();
+  await expect.poll(() => fileInput.evaluate((input) => (input as HTMLInputElement).value)).toBe("");
   await expect(page.getByText("Export frame")).toBeVisible();
   await expect(page.getByText("Ratio")).toHaveCount(0);
   const previewCanvas = page.getByLabel("Poster preview canvas");

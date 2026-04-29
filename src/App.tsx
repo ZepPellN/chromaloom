@@ -1,5 +1,5 @@
 import JSZip from "jszip";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { readableTextColor } from "./lib/color";
 import { extractThemeColorsFromImage, fileToImage, loadImageElement } from "./lib/image";
 import { renderPoster } from "./lib/renderPoster";
@@ -41,7 +41,7 @@ function App() {
     };
   }, [readyDownload]);
 
-  async function handleFiles(files: FileList | null) {
+  async function handleFiles(files: readonly File[] | null) {
     if (!files?.length) return;
 
     const remaining = MAX_BATCH - items.length;
@@ -55,7 +55,7 @@ function App() {
     const nextImages: Record<string, LoadedImage> = {};
 
     try {
-      for (const file of Array.from(files).slice(0, remaining)) {
+      for (const file of files.slice(0, remaining)) {
         if (!file.type.startsWith("image/")) continue;
         const loaded = await fileToImage(file);
         const palette = extractThemeColorsFromImage(loaded.element);
@@ -80,6 +80,12 @@ function App() {
     } finally {
       setIsProcessing(false);
     }
+  }
+
+  function handleFileInput(event: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.currentTarget.files ?? []);
+    event.currentTarget.value = "";
+    void handleFiles(files);
   }
 
   function updateSelected(next: PosterItem) {
@@ -221,7 +227,7 @@ function App() {
         <div className="masthead-actions">
           <label className="button primary">
             <span>Upload images</span>
-            <input type="file" accept="image/*" multiple onChange={(event) => void handleFiles(event.target.files)} />
+            <input type="file" accept="image/*" multiple onChange={handleFileInput} />
           </label>
         </div>
       </section>
@@ -273,15 +279,21 @@ function UploadPanel({ count, isProcessing, status, onFiles }: {
   count: number;
   isProcessing: boolean;
   status: string;
-  onFiles: (files: FileList | null) => Promise<void>;
+  onFiles: (files: readonly File[] | null) => Promise<void>;
 }) {
+  function handlePanelInput(event: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.currentTarget.files ?? []);
+    event.currentTarget.value = "";
+    void onFiles(files);
+  }
+
   return (
     <div className="drop-zone">
       <h2>Images</h2>
       <p>{status}</p>
       <label className="button ghost full">
         <span>{isProcessing ? "Reading colors" : count ? "Add more" : "Choose images"}</span>
-        <input type="file" accept="image/*" multiple onChange={(event) => void onFiles(event.target.files)} />
+        <input type="file" accept="image/*" multiple onChange={handlePanelInput} />
       </label>
       <p className="batch-count">{count}/{MAX_BATCH} in this batch</p>
     </div>
