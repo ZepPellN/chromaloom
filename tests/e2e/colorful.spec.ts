@@ -11,6 +11,25 @@ const svg = `
 test("creates and exports a poster from an uploaded image", async ({ page }) => {
   await page.goto("/");
 
+  const uploadTargets = await page.locator("label.button input[type='file']").evaluateAll((inputs) => inputs.map((input) => {
+    const label = input.closest("label");
+    const inputRect = input.getBoundingClientRect();
+    const labelRect = label?.getBoundingClientRect();
+    return {
+      inputWidth: inputRect.width,
+      inputHeight: inputRect.height,
+      labelWidth: labelRect?.width ?? 0,
+      labelHeight: labelRect?.height ?? 0,
+      pointerEvents: getComputedStyle(input).pointerEvents,
+    };
+  }));
+  expect(uploadTargets.length).toBeGreaterThan(0);
+  for (const target of uploadTargets) {
+    expect(target.pointerEvents).toBe("auto");
+    expect(target.inputWidth).toBeGreaterThanOrEqual(target.labelWidth - 1);
+    expect(target.inputHeight).toBeGreaterThanOrEqual(target.labelHeight - 1);
+  }
+
   const fileInput = page.locator(".drop-zone input[type='file']");
   await fileInput.setInputFiles({
     name: "temple.svg",

@@ -124,6 +124,7 @@ h3 {
 }
 
 .button {
+  position: relative;
   min-height: 40px;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
@@ -177,10 +178,12 @@ h3 {
 .button input,
 .drop-zone input {
   position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
+  inset: -1px;
+  inline-size: calc(100% + 2px);
+  block-size: calc(100% + 2px);
   opacity: 0;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .workspace {
