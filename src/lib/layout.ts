@@ -15,18 +15,14 @@ const FIELD_TO_IMAGE: Record<FieldMode, number> = {
   poster: 0.95,
 };
 
-const TEMPLATE_FIELD_SHARE: Record<FieldMode, number> = {
-  compact: 0.32,
-  balanced: 0.42,
-  poster: 0.52,
-};
+const BASE_LONG_EDGE = 1800;
 
 export function getPosterLayout(item: Pick<PosterItem, "naturalWidth" | "naturalHeight" | "layoutMode" | "fieldMode">): PosterLayout {
   if (item.layoutMode === "auto") {
     return getAutoLayout(item);
   }
 
-  return getTemplateLayout(item.layoutMode, item.fieldMode);
+  return getTemplateLayout(item.layoutMode, item.naturalWidth, item.naturalHeight);
 }
 
 export function fitRect(sourceWidth: number, sourceHeight: number, target: Rect, mode: "contain" | "cover", scale = 1, offsetX = 0, offsetY = 0): Rect {
@@ -62,19 +58,21 @@ function getAutoLayout(item: Pick<PosterItem, "naturalWidth" | "naturalHeight" |
   return buildRightLayout(imageWidth + fieldWidth, height, fieldWidth);
 }
 
-function getTemplateLayout(layoutMode: Exclude<LayoutMode, "auto">, fieldMode: FieldMode): PosterLayout {
-  const ratio = TEMPLATE_RATIOS[layoutMode];
-  if (ratio >= 1) {
-    const width = ratio > 1 ? 1920 : 1440;
-    const height = Math.round(width / ratio);
-    const fieldHeight = Math.round(height * TEMPLATE_FIELD_SHARE[fieldMode]);
-    return buildTopLayout(width, height, fieldHeight);
+function getTemplateLayout(layoutMode: Exclude<LayoutMode, "auto">, sourceWidth: number, sourceHeight: number): PosterLayout {
+  const targetRatio = TEMPLATE_RATIOS[layoutMode];
+  const sourceRatio = sourceWidth / sourceHeight;
+
+  if (targetRatio <= sourceRatio) {
+    const width = targetRatio >= 1 ? BASE_LONG_EDGE : Math.round(BASE_LONG_EDGE * targetRatio);
+    const imageHeight = Math.round(width / sourceRatio);
+    const height = Math.round(width / targetRatio);
+    return buildTopLayout(width, height, height - imageHeight);
   }
 
-  const height = 1800;
-  const width = Math.round(height * ratio);
-  const fieldWidth = Math.round(width * TEMPLATE_FIELD_SHARE[fieldMode]);
-  return buildRightLayout(width, height, fieldWidth);
+  const height = targetRatio >= 1 ? Math.round(BASE_LONG_EDGE / targetRatio) : BASE_LONG_EDGE;
+  const imageWidth = Math.round(height * sourceRatio);
+  const width = Math.round(height * targetRatio);
+  return buildRightLayout(width, height, width - imageWidth);
 }
 
 function buildTopLayout(width: number, height: number, fieldHeight: number): PosterLayout {

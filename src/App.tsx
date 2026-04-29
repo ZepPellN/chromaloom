@@ -110,53 +110,53 @@ function App() {
     const canvas = document.createElement("canvas");
     renderPoster(canvas, selected, image);
     const fileName = `${sanitizeFileName(selected.title || selected.fileName)}-poster.png`;
-    const filePicker = await openSaveFilePicker(fileName, "image/png", [".png"]);
     const blob = await canvasToBlob(canvas, "image/png");
+    const url = createReadyDownload(blob, fileName);
+    const filePicker = await openSaveFilePicker(fileName, "image/png", [".png"]);
 
-    if (filePicker) {
-      if (filePicker === "cancelled") {
-        setExportStatus("PNG save cancelled.");
-        return;
-      }
+    if (filePicker && filePicker !== "cancelled") {
       await writeBlobToFile(filePicker, blob);
       setExportStatus("PNG saved.");
       return;
     }
 
-    const url = URL.createObjectURL(blob);
-    if (readyDownload) revokeDownloadUrl(readyDownload.url);
-    setReadyDownload({ url, fileName });
     downloadBlobUrl(url, fileName);
-    setExportStatus("PNG download started. If the browser prompt interrupted it, use the Ready link.");
+    setExportStatus(filePicker === "cancelled"
+      ? "Save picker closed. PNG download is ready."
+      : "PNG download started. If the browser prompt interrupted it, use the Ready link.");
   }
 
   async function exportAll() {
     if (!items.length) return;
     setExportStatus("Preparing zip...");
-    if (readyDownload) revokeDownloadUrl(readyDownload.url);
-    setReadyDownload(null);
 
-    const filePicker = await openSaveFilePicker("chromaloom-posters.zip", "application/zip", [".zip"]);
     const zip = new JSZip();
     for (const item of items) {
       const blob = await renderToBlob(item, loadedImages[item.id]);
       zip.file(`${sanitizeFileName(item.title || item.fileName)}-${items.indexOf(item) + 1}.png`, blob);
     }
     const archive = await zip.generateAsync({ type: "blob" });
+    const fileName = "chromaloom-posters.zip";
+    const url = createReadyDownload(archive, fileName);
+    const filePicker = await openSaveFilePicker(fileName, "application/zip", [".zip"]);
 
-    if (filePicker) {
-      if (filePicker === "cancelled") {
-        setExportStatus("Zip save cancelled.");
-        return;
-      }
+    if (filePicker && filePicker !== "cancelled") {
       await writeBlobToFile(filePicker, archive);
       setExportStatus("Zip saved.");
       return;
     }
 
-    const url = URL.createObjectURL(archive);
-    setReadyDownload({ url, fileName: "chromaloom-posters.zip" });
-    setExportStatus("Zip is ready. Use the download link below.");
+    downloadBlobUrl(url, fileName);
+    setExportStatus(filePicker === "cancelled"
+      ? "Save picker closed. Zip download is ready."
+      : "Zip download started. If the browser prompt interrupted it, use the Ready link.");
+  }
+
+  function createReadyDownload(blob: Blob, fileName: string) {
+    const url = URL.createObjectURL(blob);
+    if (readyDownload) revokeDownloadUrl(readyDownload.url);
+    setReadyDownload({ url, fileName });
+    return url;
   }
 
   function applyCurrentStyleToAll() {
@@ -581,7 +581,7 @@ async function openSaveFilePicker(fileName: string, mimeType: string, extensions
     }) => Promise<FileSystemFileHandle>;
   };
 
-  if (navigator.webdriver || typeof pickerWindow.showSaveFilePicker !== "function") {
+  if (typeof pickerWindow.showSaveFilePicker !== "function" || isTouchLikeDevice()) {
     return null;
   }
 
@@ -596,6 +596,10 @@ async function openSaveFilePicker(fileName: string, mimeType: string, extensions
     }
     throw error;
   }
+}
+
+function isTouchLikeDevice() {
+  return navigator.maxTouchPoints > 0 || window.matchMedia("(pointer: coarse)").matches;
 }
 
 async function writeBlobToFile(fileHandle: FileSystemFileHandle | "cancelled", blob: Blob) {

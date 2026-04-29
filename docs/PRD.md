@@ -6,7 +6,7 @@ The user wants a lightweight static web tool for turning uploaded images into qu
 
 ## Solution
 
-Chromaloom is a browser-only poster maker. A user uploads one or up to nine images, each image gets a ranked palette of background candidates, and the app recommends the color most suitable for a large comfortable text field. The user edits a single title, chooses a font treatment, adjusts image fit and color-field height, then exports one PNG or all posters as a zip. The default layout keeps the original image uncropped in Auto mode; template modes allow platform-oriented ratios when needed.
+Chromaloom is a browser-only poster maker. A user uploads one or up to nine images, each image gets a ranked palette of background candidates, and the app recommends the color most suitable for a large comfortable text field. The user edits a single title, chooses a font treatment, adjusts image fit and color-field height, then exports one PNG or all posters as a zip. The default layout keeps the original image uncropped in Auto mode; template modes adjust the whole poster frame to platform-oriented ratios while keeping the image area proportional to the source.
 
 ## User Stories
 
@@ -18,7 +18,7 @@ Chromaloom is a browser-only poster maker. A user uploads one or up to nine imag
 6. As a creator, I want the top area to be a large color field, so that the result resembles the provided reference images.
 7. As a creator, I want the original image displayed without stretching or squashing, so that the exported poster preserves the source material.
 8. As a creator, I want Auto layout to preserve the original image ratio, so that uploads with different orientations do not get damaged by default.
-9. As a creator, I want optional ratio templates, so that I can make output for common social formats.
+9. As a creator, I want optional frame templates, so that I can make output for common social formats without distorting the uploaded image.
 10. As a creator, I want Contain as the default image fit, so that no source content is cropped by surprise.
 11. As a creator, I want Cover mode with manual position and scale, so that I can create a more poster-like crop when desired.
 12. As a creator, I want to type a main title, so that I can label the place or subject.
@@ -41,11 +41,11 @@ Chromaloom is a browser-only poster maker. A user uploads one or up to nine imag
 - Encapsulate color extraction in a deep module that accepts image data and returns ranked theme candidates.
 - Encapsulate poster layout in a deep module that maps poster state to deterministic rectangles and export dimensions.
 - Encapsulate canvas rendering in a deep module used by preview and export paths to keep output consistent.
-- Support Auto layout plus common export frames: 4:5, 1:1, 9:16, 16:9, 3:4, and 2:3.
+- Support Auto layout plus common export frames: 4:5, 1:1, 9:16, 16:9, 3:4, and 2:3. Frame presets change the whole poster ratio; they do not stretch or squash the source image.
 - Default image fit is Contain. Cover mode supports position and scale controls.
 - Default typography uses system Chinese serif options with editable size, weight, and font family.
 - Batch processing is capped at nine images.
-- Export selected poster as PNG and all posters as a zip of PNG files.
+- Export selected poster as PNG and all posters as a zip of PNG files. Downloads must fall back to a browser download link when the File System Access save picker is unavailable or cancelled.
 - No server, API, database, login, or image upload is required.
 
 ## Testing Decisions

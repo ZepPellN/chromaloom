@@ -30,17 +30,32 @@ describe("poster layout", () => {
     expect(layout.colorField.y).toBe(0);
   });
 
-  it("uses a right color field for portrait templates", () => {
+  it("adjusts the whole frame while preserving the image ratio for templates", () => {
     const layout = getPosterLayout({
-      naturalWidth: 1000,
-      naturalHeight: 1500,
+      naturalWidth: 7956,
+      naturalHeight: 5300,
+      layoutMode: "16:9",
+      fieldMode: "balanced",
+    });
+
+    expect(layout.width / layout.height).toBeCloseTo(16 / 9, 2);
+    expect(layout.imageArea.width / layout.imageArea.height).toBeCloseTo(7956 / 5300, 2);
+    expect(layout.colorPlacement).toBe("right");
+    expect(layout.colorField.x).toBe(layout.imageArea.width);
+  });
+
+  it("uses the top color area when a template needs extra height", () => {
+    const layout = getPosterLayout({
+      naturalWidth: 7956,
+      naturalHeight: 5300,
       layoutMode: "4:5",
       fieldMode: "balanced",
     });
 
     expect(layout.width / layout.height).toBeCloseTo(4 / 5, 2);
-    expect(layout.colorPlacement).toBe("right");
-    expect(layout.colorField.width / layout.width).toBeCloseTo(0.42, 2);
+    expect(layout.imageArea.width / layout.imageArea.height).toBeCloseTo(7956 / 5300, 2);
+    expect(layout.colorPlacement).toBe("top");
+    expect(layout.colorField.y).toBe(0);
   });
 
   it("fits source rectangles using contain and cover", () => {

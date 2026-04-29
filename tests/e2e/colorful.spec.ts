@@ -44,3 +44,30 @@ test("creates and exports a poster from an uploaded image", async ({ page }) => 
   expect(download.suggestedFilename()).toContain("山西-青龙寺");
   await expect(page.getByRole("link", { name: "Ready" })).toBeVisible();
 });
+
+test("falls back to browser download when the save picker is cancelled", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name === "mobile", "Mobile skips the save picker and uses browser download directly.");
+
+  await page.addInitScript(() => {
+    window.showSaveFilePicker = async () => {
+      throw new DOMException("The user aborted a request.", "AbortError");
+    };
+  });
+  await page.goto("/");
+
+  await page.getByLabel("Choose images").setInputFiles({
+    name: "temple.svg",
+    mimeType: "image/svg+xml",
+    buffer: Buffer.from(svg),
+  });
+
+  await expect(page.getByText("Processed 1 image.")).toBeVisible();
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: "PNG" }).click();
+  const download = await downloadPromise;
+
+  expect(download.suggestedFilename()).toContain("temple-poster");
+  await expect(page.getByRole("link", { name: "Ready" })).toBeVisible();
+  await expect(page.getByText("PNG save cancelled.")).toHaveCount(0);
+  await expect(page.getByText("Save picker closed. PNG download is ready.")).toBeVisible();
+});
