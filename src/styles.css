@@ -288,7 +288,8 @@ h3 {
 }
 
 .poster-canvas {
-  width: min(100%, 780px);
+  width: auto;
+  max-width: 100%;
   max-height: calc(100vh - 190px);
   height: auto;
   display: block;

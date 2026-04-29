@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { fitRect, getPosterLayout } from "./layout";
 
 describe("poster layout", () => {
-  it("preserves source image ratio in auto layout", () => {
+  it("puts the color field on the right for portrait auto layout", () => {
     const layout = getPosterLayout({
       naturalWidth: 1000,
       naturalHeight: 1500,
@@ -10,12 +10,27 @@ describe("poster layout", () => {
       fieldMode: "balanced",
     });
 
-    expect(layout.width).toBe(1440);
+    expect(layout.colorPlacement).toBe("right");
     expect(layout.imageArea.width / layout.imageArea.height).toBeCloseTo(1000 / 1500, 2);
-    expect(layout.colorField.height).toBeGreaterThan(0);
+    expect(layout.colorField.x).toBe(layout.imageArea.width);
+    expect(layout.colorField.height).toBe(layout.height);
   });
 
-  it("uses fixed ratios for template layouts", () => {
+  it("puts the color field on top for landscape auto layout", () => {
+    const layout = getPosterLayout({
+      naturalWidth: 1600,
+      naturalHeight: 900,
+      layoutMode: "auto",
+      fieldMode: "balanced",
+    });
+
+    expect(layout.colorPlacement).toBe("top");
+    expect(layout.imageArea.width / layout.imageArea.height).toBeCloseTo(1600 / 900, 2);
+    expect(layout.colorField.width).toBe(layout.width);
+    expect(layout.colorField.y).toBe(0);
+  });
+
+  it("uses a right color field for portrait templates", () => {
     const layout = getPosterLayout({
       naturalWidth: 1000,
       naturalHeight: 1500,
@@ -24,7 +39,8 @@ describe("poster layout", () => {
     });
 
     expect(layout.width / layout.height).toBeCloseTo(4 / 5, 2);
-    expect(layout.colorField.height / layout.height).toBeCloseTo(0.42, 2);
+    expect(layout.colorPlacement).toBe("right");
+    expect(layout.colorField.width / layout.width).toBeCloseTo(0.42, 2);
   });
 
   it("fits source rectangles using contain and cover", () => {

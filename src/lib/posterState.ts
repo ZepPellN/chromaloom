@@ -60,7 +60,7 @@ export function sanitizeFileName(name: string): string {
     .slice(0, 72) || "poster";
 }
 
-export const layoutModes: LayoutMode[] = ["auto", "4:5", "1:1", "9:16", "16:9", "3:4"];
+export const layoutModes: LayoutMode[] = ["auto", "4:5", "1:1", "9:16", "16:9", "3:4", "2:3"];
 export const fieldModes: FieldMode[] = ["compact", "balanced", "poster"];
 export const fitModes: FitMode[] = ["contain", "cover"];
 export const textColorModes: TextColorMode[] = ["auto", "ink", "paper"];

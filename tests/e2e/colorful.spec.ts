@@ -18,7 +18,18 @@ test("creates and exports a poster from an uploaded image", async ({ page }) => 
   });
 
   await expect(page.getByText("Processed 1 image.")).toBeVisible();
-  await expect(page.getByLabel("Poster preview canvas")).toBeVisible();
+  const previewCanvas = page.getByLabel("Poster preview canvas");
+  await expect(previewCanvas).toBeVisible();
+  const canvasRatio = await previewCanvas.evaluate((canvas) => {
+    const element = canvas as HTMLCanvasElement;
+    const box = element.getBoundingClientRect();
+    return {
+      intrinsic: element.width / element.height,
+      displayed: box.width / box.height,
+    };
+  });
+  expect(canvasRatio.intrinsic).toBeGreaterThan(1);
+  expect(canvasRatio.displayed).toBeCloseTo(canvasRatio.intrinsic, 1);
 
   await page.getByLabel("Title").fill("山西·青龙寺");
   await page.getByRole("button", { name: "4:5" }).click();

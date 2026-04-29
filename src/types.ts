@@ -1,5 +1,5 @@
 export type FitMode = "contain" | "cover";
-export type LayoutMode = "auto" | "4:5" | "1:1" | "9:16" | "16:9" | "3:4";
+export type LayoutMode = "auto" | "4:5" | "1:1" | "9:16" | "16:9" | "3:4" | "2:3";
 export type FieldMode = "compact" | "balanced" | "poster";
 export type TextColorMode = "auto" | "ink" | "paper";
 
@@ -61,6 +61,7 @@ export interface PosterLayout {
   colorField: Rect;
   imageArea: Rect;
   titleAnchor: { x: number; y: number };
+  colorPlacement: "top" | "right";
 }
 
 export interface LoadedImage {
