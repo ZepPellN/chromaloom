@@ -115,7 +115,8 @@ function drawCalendar(context: CanvasRenderingContext2D, item: PosterItem, layou
     context.fillText(String(day).padStart(2, "0"), x, y);
 
     if (day === safeDay) {
-      drawCalendarIcon(context, resolveCalendarIcon(item.calendarIcon, item.fileName, item.palette), x + daySize * 0.78, y + daySize * 0.02, daySize * 0.82, iconColor);
+      const iconSize = Math.max(daySize, Math.min(daySize * 1.22, cellWidth * 0.56, dayRowGap * 0.82));
+      drawCalendarIcon(context, resolveCalendarIcon(item.calendarIcon, item.fileName, item.palette), x + daySize * 0.82, y - daySize * 0.18, iconSize, iconColor);
     }
   }
 
