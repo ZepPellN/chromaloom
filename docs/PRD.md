@@ -24,7 +24,7 @@ Chromaloom is a browser-only poster maker. A user uploads one or up to nine imag
 12. As a creator, I want Cover mode with manual position and scale, so that I can create a more poster-like crop when desired.
 13. As a creator, I want a Calendar mode, so that the selected date can be shown as part of the poster.
 14. As a creator, I want the app to infer the calendar date when possible, so that recent photos become calendar posters quickly.
-15. As a creator, I want to edit year, month, day, and icon, so that metadata mistakes remain fixable.
+15. As a creator, I want to edit year, month, day, and a decorative flower/star icon, so that metadata mistakes remain fixable and the date mark stays visually consistent.
 16. As a creator, I want to type a main title, so that I can label the place or subject.
 17. As a creator, I want basic font controls, so that the title can match the image mood.
 18. As a creator, I want automatic black or white title color, so that contrast remains acceptable.

@@ -12,7 +12,7 @@ const FILENAME_DATE_PATTERNS = [
   /((?:19|20)\d{2})([01]\d)([0-3]\d)/,
 ];
 
-export const calendarIcons: CalendarIcon[] = ["auto", "flower", "sun", "leaf", "water", "mountain", "moon", "dot"];
+export const calendarIcons: CalendarIcon[] = ["auto", "flower", "star"];
 
 export async function inferCalendarDate(file: File): Promise<CalendarDateParts> {
   const exifDate = await readExifDate(file);
@@ -39,24 +39,26 @@ export function parseDateFromFileName(fileName: string): CalendarDateParts | nul
 export function recommendCalendarIcon(fileName: string, palette: ThemeColor[]): CalendarIcon {
   const lower = fileName.toLowerCase();
   if (/(flower|flora|bloom|daisy|rose|花|黄花|小黄花)/.test(lower)) return "flower";
-  if (/(leaf|tree|forest|grass|plant|叶|树|草|森林)/.test(lower)) return "leaf";
-  if (/(sea|lake|river|water|雨|海|湖|河|水)/.test(lower)) return "water";
-  if (/(mountain|hill|山)/.test(lower)) return "mountain";
-  if (/(night|moon|月|夜)/.test(lower)) return "moon";
-  if (/(sun|light|日|太阳|阳光)/.test(lower)) return "sun";
+  if (/(star|星|星星)/.test(lower)) return "star";
 
   const color = palette[0]?.rgb;
-  if (!color) return "dot";
-  if (color.g > color.r * 1.08 && color.g > color.b * 1.08) return "leaf";
-  if (color.b > color.r * 1.12 && color.b > color.g * 1.05) return "water";
-  if (color.r > 160 && color.g > 120 && color.b < 100) return "sun";
-  return "dot";
+  if (!color) return stableDecorativeIcon(fileName);
+  if (color.g > color.r * 1.05 && color.g > color.b * 1.05) return "flower";
+  return stableDecorativeIcon(`${fileName}-${color.r}-${color.g}-${color.b}`);
 }
 
 export function resolveCalendarIcon(icon: CalendarIcon, fileName: string, palette: ThemeColor[]): Exclude<CalendarIcon, "auto"> {
   if (icon !== "auto") return icon;
   const recommended = recommendCalendarIcon(fileName, palette);
-  return recommended === "auto" ? "dot" : recommended;
+  return recommended === "auto" ? stableDecorativeIcon(fileName) : recommended;
+}
+
+function stableDecorativeIcon(seed: string): Exclude<CalendarIcon, "auto"> {
+  let hash = 0;
+  for (let index = 0; index < seed.length; index += 1) {
+    hash = (hash * 31 + seed.charCodeAt(index)) >>> 0;
+  }
+  return hash % 2 === 0 ? "flower" : "star";
 }
 
 function parseDateParts(yearValue: string, monthValue: string, dayValue: string): CalendarDateParts | null {

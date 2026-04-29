@@ -192,9 +192,8 @@ function clampDay(year: number, monthIndex: number, day: number) {
 }
 
 function pickIconColor(item: PosterItem) {
-  const text = readableTextColor(item.themeColor, item.textColorMode);
   if (resolveCalendarIcon(item.calendarIcon, item.fileName, item.palette) === "flower") return "#f3c83f";
-  return text;
+  return "#f6d760";
 }
 
 function drawCalendarIcon(
@@ -213,12 +212,7 @@ function drawCalendarIcon(
   context.lineJoin = "round";
 
   if (icon === "flower") drawFlower(context, x, y, size, color);
-  else if (icon === "sun") drawSun(context, x, y, size);
-  else if (icon === "leaf") drawLeaf(context, x, y, size);
-  else if (icon === "water") drawWater(context, x, y, size);
-  else if (icon === "mountain") drawMountain(context, x, y, size);
-  else if (icon === "moon") drawMoon(context, x, y, size);
-  else drawDot(context, x, y, size);
+  else drawStar(context, x, y, size);
 
   context.restore();
 }
@@ -237,59 +231,16 @@ function drawFlower(context: CanvasRenderingContext2D, x: number, y: number, siz
   context.fill();
 }
 
-function drawSun(context: CanvasRenderingContext2D, x: number, y: number, size: number) {
+function drawStar(context: CanvasRenderingContext2D, x: number, y: number, size: number) {
   context.beginPath();
-  context.arc(x, y, size * 0.28, 0, Math.PI * 2);
-  context.fill();
-  for (let index = 0; index < 10; index += 1) {
-    const angle = (Math.PI * 2 * index) / 10;
-    context.beginPath();
-    context.moveTo(x + Math.cos(angle) * size * 0.45, y + Math.sin(angle) * size * 0.45);
-    context.lineTo(x + Math.cos(angle) * size * 0.68, y + Math.sin(angle) * size * 0.68);
-    context.stroke();
+  for (let point = 0; point < 10; point += 1) {
+    const radius = point % 2 === 0 ? size * 0.62 : size * 0.27;
+    const angle = -Math.PI / 2 + point * (Math.PI / 5);
+    const px = x + Math.cos(angle) * radius;
+    const py = y + Math.sin(angle) * radius;
+    if (point === 0) context.moveTo(px, py);
+    else context.lineTo(px, py);
   }
-}
-
-function drawLeaf(context: CanvasRenderingContext2D, x: number, y: number, size: number) {
-  context.beginPath();
-  context.ellipse(x, y, size * 0.32, size * 0.58, Math.PI / 4, 0, Math.PI * 2);
-  context.stroke();
-  context.beginPath();
-  context.moveTo(x - size * 0.28, y + size * 0.32);
-  context.lineTo(x + size * 0.3, y - size * 0.34);
-  context.stroke();
-}
-
-function drawWater(context: CanvasRenderingContext2D, x: number, y: number, size: number) {
-  for (let row = 0; row < 2; row += 1) {
-    context.beginPath();
-    context.moveTo(x - size * 0.52, y - size * 0.12 + row * size * 0.32);
-    context.quadraticCurveTo(x - size * 0.24, y - size * 0.32 + row * size * 0.32, x, y - size * 0.12 + row * size * 0.32);
-    context.quadraticCurveTo(x + size * 0.24, y + size * 0.08 + row * size * 0.32, x + size * 0.52, y - size * 0.12 + row * size * 0.32);
-    context.stroke();
-  }
-}
-
-function drawMountain(context: CanvasRenderingContext2D, x: number, y: number, size: number) {
-  context.beginPath();
-  context.moveTo(x - size * 0.6, y + size * 0.38);
-  context.lineTo(x - size * 0.18, y - size * 0.38);
-  context.lineTo(x + size * 0.1, y + size * 0.08);
-  context.lineTo(x + size * 0.32, y - size * 0.22);
-  context.lineTo(x + size * 0.62, y + size * 0.38);
   context.closePath();
-  context.stroke();
-}
-
-function drawMoon(context: CanvasRenderingContext2D, x: number, y: number, size: number) {
-  context.beginPath();
-  context.arc(x, y, size * 0.48, Math.PI * 0.18, Math.PI * 1.72);
-  context.quadraticCurveTo(x - size * 0.05, y, x + size * 0.34, y - size * 0.42);
-  context.fill();
-}
-
-function drawDot(context: CanvasRenderingContext2D, x: number, y: number, size: number) {
-  context.beginPath();
-  context.arc(x, y, size * 0.28, 0, Math.PI * 2);
   context.fill();
 }
