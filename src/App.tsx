@@ -101,16 +101,9 @@ function App() {
 
   async function exportSelected() {
     if (!selected) return;
-    const image = loadedImages[selected.id];
-    if (!image) {
-      setExportStatus("Image is still loading. Try again in a moment.");
-      return;
-    }
-
-    const canvas = document.createElement("canvas");
-    renderPoster(canvas, selected, image);
-    const fileName = `${sanitizeFileName(selected.title || selected.fileName)}-poster.png`;
-    const blob = await canvasToBlob(canvas, "image/png");
+    const output = await renderSelectedPng();
+    if (!output) return;
+    const { blob, fileName } = output;
     const url = createReadyDownload(blob, fileName);
     const filePicker = await openSaveFilePicker(fileName, "image/png", [".png"]);
 
@@ -124,6 +117,33 @@ function App() {
     setExportStatus(filePicker === "cancelled"
       ? "Save picker closed. PNG download is ready."
       : "PNG download started. If the browser prompt interrupted it, use the Ready link.");
+  }
+
+  async function shareSelected() {
+    if (!selected) return;
+    const output = await renderSelectedPng();
+    if (!output) return;
+    const { blob, fileName } = output;
+    const file = new File([blob], fileName, { type: "image/png" });
+    const url = createReadyDownload(blob, fileName);
+
+    if (canShareFile(file)) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: "Chromaloom poster",
+        });
+        setExportStatus("Share sheet opened. Choose Save Image to add it to Photos.");
+        return;
+      } catch (error) {
+        if (!(error instanceof DOMException && error.name === "AbortError")) {
+          throw error;
+        }
+      }
+    }
+
+    downloadBlobUrl(url, fileName);
+    setExportStatus("Share is unavailable here. PNG download is ready.");
   }
 
   async function exportAll() {
@@ -162,6 +182,21 @@ function App() {
   function applyCurrentStyleToAll() {
     if (!selected) return;
     setItems((current) => current.map((item) => (item.id === selected.id ? item : applyStyleFrom(selected, item))));
+  }
+
+  async function renderSelectedPng() {
+    if (!selected) return null;
+    const image = loadedImages[selected.id];
+    if (!image) {
+      setExportStatus("Image is still loading. Try again in a moment.");
+      return null;
+    }
+
+    const canvas = document.createElement("canvas");
+    renderPoster(canvas, selected, image);
+    const fileName = `${sanitizeFileName(selected.title || selected.fileName)}-poster.png`;
+    const blob = await canvasToBlob(canvas, "image/png");
+    return { blob, fileName };
   }
 
   async function renderToBlob(item: PosterItem, loaded?: LoadedImage): Promise<Blob> {
@@ -219,6 +254,7 @@ function App() {
               onRemove={removeSelected}
               onApplyAll={applyCurrentStyleToAll}
               onExportPng={exportSelected}
+              onSharePng={shareSelected}
               onExportAll={exportAll}
               readyDownload={readyDownload}
               exportStatus={exportStatus}
@@ -342,6 +378,7 @@ function Controls({
   onRemove,
   onApplyAll,
   onExportPng,
+  onSharePng,
   onExportAll,
   readyDownload,
   exportStatus,
@@ -352,6 +389,7 @@ function Controls({
   onRemove: () => void;
   onApplyAll: () => void;
   onExportPng: () => Promise<void>;
+  onSharePng: () => Promise<void>;
   onExportAll: () => Promise<void>;
   readyDownload: { url: string; fileName: string } | null;
   exportStatus: string;
@@ -366,6 +404,7 @@ function Controls({
         </div>
         <div className="export-actions">
           <button className="button primary" type="button" onClick={() => void onExportPng()}>PNG</button>
+          <button className="button" type="button" onClick={() => void onSharePng()}>Share</button>
           <button className="button" type="button" onClick={() => void onExportAll()}>Zip</button>
           {readyDownload ? (
             <a
@@ -600,6 +639,11 @@ async function openSaveFilePicker(fileName: string, mimeType: string, extensions
 
 function isTouchLikeDevice() {
   return navigator.maxTouchPoints > 0 || window.matchMedia("(pointer: coarse)").matches;
+}
+
+function canShareFile(file: File) {
+  return typeof navigator.share === "function"
+    && (typeof navigator.canShare !== "function" || navigator.canShare({ files: [file] }));
 }
 
 async function writeBlobToFile(fileHandle: FileSystemFileHandle | "cancelled", blob: Blob) {

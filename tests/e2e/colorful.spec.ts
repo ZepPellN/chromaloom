@@ -71,3 +71,32 @@ test("falls back to browser download when the save picker is cancelled", async (
   await expect(page.getByText("PNG save cancelled.")).toHaveCount(0);
   await expect(page.getByText("Save picker closed. PNG download is ready.")).toBeVisible();
 });
+
+test("shares the selected poster as a PNG file", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "canShare", {
+      configurable: true,
+      value: (data: ShareData) => Boolean(data.files?.length),
+    });
+    Object.defineProperty(navigator, "share", {
+      configurable: true,
+      value: async (data: ShareData) => {
+        window.sessionStorage.setItem("shared-file-name", data.files?.[0]?.name ?? "");
+      },
+    });
+  });
+  await page.goto("/");
+
+  await page.getByLabel("Choose images").setInputFiles({
+    name: "temple.svg",
+    mimeType: "image/svg+xml",
+    buffer: Buffer.from(svg),
+  });
+
+  await expect(page.getByText("Processed 1 image.")).toBeVisible();
+  await page.getByRole("button", { name: "Share" }).click();
+
+  await expect(page.getByRole("link", { name: "Ready" })).toBeVisible();
+  await expect(page.getByText("Share sheet opened. Choose Save Image to add it to Photos.")).toBeVisible();
+  await expect.poll(() => page.evaluate(() => window.sessionStorage.getItem("shared-file-name"))).toContain("temple-poster.png");
+});

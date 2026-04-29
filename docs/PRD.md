@@ -45,7 +45,7 @@ Chromaloom is a browser-only poster maker. A user uploads one or up to nine imag
 - Default image fit is Contain. Cover mode supports position and scale controls.
 - Default typography uses system Chinese serif options with editable size, weight, and font family.
 - Batch processing is capped at nine images.
-- Export selected poster as PNG and all posters as a zip of PNG files. Downloads must fall back to a browser download link when the File System Access save picker is unavailable or cancelled.
+- Export selected poster as PNG, share the selected poster through the mobile system share sheet, and export all posters as a zip of PNG files. Downloads must fall back to a browser download link when the File System Access save picker is unavailable or cancelled.
 - No server, API, database, login, or image upload is required.
 
 ## Testing Decisions

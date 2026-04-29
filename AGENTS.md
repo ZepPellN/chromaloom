@@ -17,6 +17,7 @@ Build Chromaloom as a pure front-end poster maker for GitHub Pages. The product 
 
 - Keep image processing in the browser. Do not add a backend unless the product direction changes.
 - Keep preview and export visually consistent by using shared layout and rendering code.
+- Use the Web Share API for mobile-friendly single-poster sharing, with a Ready download link as fallback.
 - Prefer small, testable pure modules for color extraction, poster layout, and state transforms.
 - Keep batch processing capped at nine images unless performance is explicitly revisited.
 - Use conventional commits: `feat`, `fix`, `docs`, `chore`, `test`.
