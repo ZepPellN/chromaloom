@@ -24,6 +24,8 @@ const FONT_OPTIONS = [
   { label: "Serif", value: `Georgia, "Times New Roman", serif` },
 ];
 
+const MAX_FAILURE_NAMES = 3;
+
 function App() {
   const [items, setItems] = useState<PosterItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -53,33 +55,56 @@ function App() {
     setIsProcessing(true);
     const nextItems: PosterItem[] = [];
     const nextImages: Record<string, LoadedImage> = {};
+    const failures: string[] = [];
 
     try {
       for (const file of files.slice(0, remaining)) {
-        if (!file.type.startsWith("image/")) continue;
-        const loaded = await fileToImage(file);
-        const palette = extractThemeColorsFromImage(loaded.element);
-        const item = createPosterItem({
-          id: crypto.randomUUID(),
-          fileName: file.name,
-          imageUrl: loaded.url,
-          naturalWidth: loaded.width,
-          naturalHeight: loaded.height,
-          palette,
-        });
-        nextItems.push(item);
-        nextImages[item.id] = loaded;
+        if (!file.type.startsWith("image/")) {
+          failures.push(file.name || "Untitled file");
+          continue;
+        }
+
+        try {
+          const loaded = await fileToImage(file);
+          const palette = extractThemeColorsFromImage(loaded.element);
+          const item = createPosterItem({
+            id: crypto.randomUUID(),
+            fileName: file.name,
+            imageUrl: loaded.url,
+            naturalWidth: loaded.width,
+            naturalHeight: loaded.height,
+            palette,
+          });
+          nextItems.push(item);
+          nextImages[item.id] = loaded;
+        } catch {
+          failures.push(file.name || "Untitled image");
+        }
       }
 
       setItems((current) => [...current, ...nextItems]);
       setLoadedImages((current) => ({ ...current, ...nextImages }));
       if (nextItems[0]) setSelectedId(nextItems[0].id);
-      setStatus(nextItems.length > 0 ? `Processed ${nextItems.length} image${nextItems.length > 1 ? "s" : ""}.` : "No supported images found.");
+      setStatus(formatImportStatus(nextItems.length, failures));
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Could not process image.");
     } finally {
       setIsProcessing(false);
     }
+  }
+
+  function formatImportStatus(importedCount: number, failures: string[]) {
+    const imported = importedCount > 0
+      ? `Processed ${importedCount} image${importedCount > 1 ? "s" : ""}.`
+      : "";
+
+    if (!failures.length) return imported || "No supported images found.";
+
+    const visibleNames = failures.slice(0, MAX_FAILURE_NAMES).join(", ");
+    const extraCount = failures.length - MAX_FAILURE_NAMES;
+    const failed = `Could not decode ${failures.length} file${failures.length > 1 ? "s" : ""}: ${visibleNames}${extraCount > 0 ? `, +${extraCount} more` : ""}. Try JPEG, PNG, WebP, or another browser-supported image.`;
+
+    return imported ? `${imported} ${failed}` : failed;
   }
 
   function handleFileInput(event: ChangeEvent<HTMLInputElement>) {

@@ -93,6 +93,40 @@ test("falls back to browser download when the save picker is cancelled", async (
   await expect(page.getByText("Save picker closed. PNG download is ready.")).toBeVisible();
 });
 
+test("imports decodable images while reporting decode failures", async ({ page }) => {
+  await page.goto("/");
+
+  await page.locator(".drop-zone input[type='file']").setInputFiles([
+    {
+      name: "temple.svg",
+      mimeType: "image/svg+xml",
+      buffer: Buffer.from(svg),
+    },
+    {
+      name: "broken.jpg",
+      mimeType: "image/jpeg",
+      buffer: Buffer.from("not a real jpeg"),
+    },
+  ]);
+
+  await expect(page.getByText(/Processed 1 image\./)).toBeVisible();
+  await expect(page.getByText(/Could not decode 1 file: broken\.jpg/)).toBeVisible();
+  await expect(page.getByLabel("Poster preview canvas")).toBeVisible();
+});
+
+test("reports unsupported images without creating an empty poster", async ({ page }) => {
+  await page.goto("/");
+
+  await page.locator(".drop-zone input[type='file']").setInputFiles({
+    name: "broken.jpg",
+    mimeType: "image/jpeg",
+    buffer: Buffer.from("not a real jpeg"),
+  });
+
+  await expect(page.getByText(/Could not decode 1 file: broken\.jpg/)).toBeVisible();
+  await expect(page.getByLabel("Poster preview canvas")).toHaveCount(0);
+});
+
 test("shares the selected poster as a PNG file", async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "canShare", {

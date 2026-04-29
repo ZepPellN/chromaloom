@@ -15,8 +15,13 @@ export async function loadImageElement(src: string): Promise<LoadedImage> {
 
 export async function fileToImage(file: File): Promise<LoadedImage & { url: string }> {
   const url = URL.createObjectURL(file);
-  const loaded = await loadImageElement(url);
-  return { ...loaded, url };
+  try {
+    const loaded = await loadImageElement(url);
+    return { ...loaded, url };
+  } catch (error) {
+    URL.revokeObjectURL(url);
+    throw error;
+  }
 }
 
 export function extractThemeColorsFromImage(image: HTMLImageElement, maxSide = 220): ThemeColor[] {
