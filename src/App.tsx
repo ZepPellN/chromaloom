@@ -83,9 +83,11 @@ function App() {
   }
 
   function handleFileInput(event: ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(event.currentTarget.files ?? []);
-    event.currentTarget.value = "";
-    void handleFiles(files);
+    const input = event.currentTarget;
+    const files = Array.from(input.files ?? []);
+    void handleFiles(files).finally(() => {
+      input.value = "";
+    });
   }
 
   function updateSelected(next: PosterItem) {
@@ -282,9 +284,11 @@ function UploadPanel({ count, isProcessing, status, onFiles }: {
   onFiles: (files: readonly File[] | null) => Promise<void>;
 }) {
   function handlePanelInput(event: ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(event.currentTarget.files ?? []);
-    event.currentTarget.value = "";
-    void onFiles(files);
+    const input = event.currentTarget;
+    const files = Array.from(input.files ?? []);
+    void onFiles(files).finally(() => {
+      input.value = "";
+    });
   }
 
   return (
