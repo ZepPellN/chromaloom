@@ -18,6 +18,8 @@ test("creates and exports a poster from an uploaded image", async ({ page }) => 
   });
 
   await expect(page.getByText("Processed 1 image.")).toBeVisible();
+  await expect(page.getByText("Export frame")).toBeVisible();
+  await expect(page.getByText("Ratio")).toHaveCount(0);
   const previewCanvas = page.getByLabel("Poster preview canvas");
   await expect(previewCanvas).toBeVisible();
   const canvasRatio = await previewCanvas.evaluate((canvas) => {

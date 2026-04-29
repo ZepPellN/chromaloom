@@ -328,7 +328,7 @@ function PosterPreview({ item, image, onChange }: {
         onPointerCancel={handlePointerUp}
       />
       <div className="preview-meta">
-        <span>{item.layoutMode === "auto" ? "Auto ratio" : item.layoutMode}</span>
+        <span>{item.layoutMode === "auto" ? "Auto frame" : `${item.layoutMode} frame`}</span>
         <span>{item.fitMode}</span>
         <span>{item.naturalWidth}x{item.naturalHeight}</span>
       </div>
@@ -426,21 +426,21 @@ function Controls({
       </label>
 
       <Segmented<LayoutMode>
-        label="Ratio"
+        label="Export frame"
         value={item.layoutMode}
         values={layoutModes}
         onChange={(value) => onChange(updatePosterSetting(item, "layoutMode", value))}
       />
 
       <Segmented<FieldMode>
-        label="Color field"
+        label="Color area"
         value={item.fieldMode}
         values={fieldModes}
         onChange={(value) => onChange(updatePosterSetting(item, "fieldMode", value))}
       />
 
       <Segmented<FitMode>
-        label="Image fit"
+        label="Photo fit"
         value={item.fitMode}
         values={fitModes}
         onChange={(value) => onChange(updatePosterSetting(item, "fitMode", value))}

@@ -6,12 +6,12 @@ Build Chromaloom as a pure front-end poster maker for GitHub Pages. The product 
 
 ## Product Vocabulary
 
-- **Poster**: The exportable composition containing a top color field and bottom image area.
+- **Poster**: The exportable composition containing a color area and the source image.
 - **Theme color**: A ranked color candidate extracted from the source image and suitable for a large background.
-- **Color field**: The top area filled with the selected theme color.
-- **Source image**: The uploaded image rendered below the color field.
-- **Auto layout**: A layout mode that preserves the source image ratio by default.
-- **Template layout**: A fixed output ratio such as 4:5, 1:1, 9:16, 16:9, or 3:4.
+- **Color area**: The area filled with the selected theme color. It sits above landscape or square photos and to the right of portrait photos in Auto layout.
+- **Source image**: The uploaded image rendered without distortion.
+- **Auto layout**: A layout mode that preserves the source image ratio and derives the export frame from the image orientation.
+- **Template layout**: A fixed export frame such as 4:5, 1:1, 9:16, 16:9, 3:4, or 2:3.
 
 ## Engineering Rules
 

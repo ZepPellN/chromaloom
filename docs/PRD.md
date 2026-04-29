@@ -2,7 +2,7 @@
 
 ## Problem Statement
 
-The user wants a lightweight static web tool for turning uploaded images into quiet editorial color posters. They need the tool to extract theme colors from an image, select a background color that represents the image's mood, place editable title text on that color field, preserve the source image below it, and export the result without a server.
+The user wants a lightweight static web tool for turning uploaded images into quiet editorial color posters. They need the tool to extract theme colors from an image, select a background color that represents the image's mood, place editable title text on that color area, preserve the source image without distortion, and export the result without a server.
 
 ## Solution
 
@@ -16,7 +16,7 @@ Chromaloom is a browser-only poster maker. A user uploads one or up to nine imag
 4. As a creator, I want to see multiple color candidates, so that I can override the automatic recommendation.
 5. As a creator, I want the recommended color to keep title text readable, so that exported posters remain legible.
 6. As a creator, I want the top area to be a large color field, so that the result resembles the provided reference images.
-7. As a creator, I want the original image displayed below the color field, so that the exported poster preserves the source material.
+7. As a creator, I want the original image displayed without stretching or squashing, so that the exported poster preserves the source material.
 8. As a creator, I want Auto layout to preserve the original image ratio, so that uploads with different orientations do not get damaged by default.
 9. As a creator, I want optional ratio templates, so that I can make output for common social formats.
 10. As a creator, I want Contain as the default image fit, so that no source content is cropped by surprise.
@@ -41,7 +41,7 @@ Chromaloom is a browser-only poster maker. A user uploads one or up to nine imag
 - Encapsulate color extraction in a deep module that accepts image data and returns ranked theme candidates.
 - Encapsulate poster layout in a deep module that maps poster state to deterministic rectangles and export dimensions.
 - Encapsulate canvas rendering in a deep module used by preview and export paths to keep output consistent.
-- Support Auto layout plus common templates: 4:5, 1:1, 9:16, 16:9, and 3:4.
+- Support Auto layout plus common export frames: 4:5, 1:1, 9:16, 16:9, 3:4, and 2:3.
 - Default image fit is Contain. Cover mode supports position and scale controls.
 - Default typography uses system Chinese serif options with editable size, weight, and font family.
 - Batch processing is capped at nine images.

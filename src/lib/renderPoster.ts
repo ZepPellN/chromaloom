@@ -6,6 +6,8 @@ export interface RenderOptions {
   previewScale?: number;
 }
 
+const IMAGE_MAT_COLOR = "#f7f6f2";
+
 export function renderPoster(
   canvas: HTMLCanvasElement,
   item: PosterItem,
@@ -26,7 +28,7 @@ export function renderPoster(
   context.setTransform(scale, 0, 0, scale, 0, 0);
   context.clearRect(0, 0, layout.width, layout.height);
 
-  context.fillStyle = item.themeColor;
+  context.fillStyle = IMAGE_MAT_COLOR;
   context.fillRect(0, 0, layout.width, layout.height);
 
   context.fillStyle = item.themeColor;
