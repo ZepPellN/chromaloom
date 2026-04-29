@@ -2,6 +2,8 @@ export type FitMode = "contain" | "cover";
 export type LayoutMode = "auto" | "4:5" | "1:1" | "9:16" | "16:9" | "3:4" | "2:3";
 export type FieldMode = "compact" | "balanced" | "poster";
 export type ColorPosition = "auto" | "top" | "bottom" | "left" | "right";
+export type CompositionMode = "poster" | "calendar";
+export type CalendarIcon = "auto" | "flower" | "sun" | "leaf" | "water" | "mountain" | "moon" | "dot";
 export type TextColorMode = "auto" | "ink" | "paper";
 
 export interface ThemeColor {
@@ -33,6 +35,11 @@ export interface PosterSettings {
   layoutMode: LayoutMode;
   fieldMode: FieldMode;
   colorPosition: ColorPosition;
+  compositionMode: CompositionMode;
+  calendarYear: number;
+  calendarMonth: number;
+  calendarDay: number;
+  calendarIcon: CalendarIcon;
   fitMode: FitMode;
   textColorMode: TextColorMode;
   fontFamily: string;

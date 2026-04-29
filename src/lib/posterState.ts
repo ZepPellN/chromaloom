@@ -1,4 +1,5 @@
-import type { ColorPosition, FieldMode, FitMode, LayoutMode, PosterItem, PosterSettings, TextColorMode, ThemeColor } from "../types";
+import { calendarIcons } from "./calendar";
+import type { CalendarIcon, ColorPosition, CompositionMode, FieldMode, FitMode, LayoutMode, PosterItem, PosterSettings, TextColorMode, ThemeColor } from "../types";
 
 export const MAX_BATCH = 9;
 
@@ -11,9 +12,14 @@ export function createPosterItem(input: {
   naturalWidth: number;
   naturalHeight: number;
   palette: ThemeColor[];
+  calendarYear?: number;
+  calendarMonth?: number;
+  calendarDay?: number;
+  calendarIcon?: CalendarIcon;
   title?: string;
 }): PosterItem {
   const themeColor = input.palette[0]?.hex ?? "#889976";
+  const now = new Date();
   return {
     id: input.id,
     fileName: input.fileName,
@@ -27,6 +33,11 @@ export function createPosterItem(input: {
     layoutMode: "auto",
     fieldMode: "balanced",
     colorPosition: "auto",
+    compositionMode: "poster",
+    calendarYear: input.calendarYear ?? now.getFullYear(),
+    calendarMonth: input.calendarMonth ?? now.getMonth() + 1,
+    calendarDay: input.calendarDay ?? now.getDate(),
+    calendarIcon: input.calendarIcon ?? "auto",
     fitMode: "contain",
     textColorMode: "auto",
     fontFamily: DEFAULT_FONT,
@@ -40,6 +51,7 @@ export function applyStyleFrom(source: PosterItem, target: PosterItem): PosterIt
   return {
     ...target,
     title: source.title,
+    compositionMode: source.compositionMode,
     layoutMode: source.layoutMode,
     fieldMode: source.fieldMode,
     colorPosition: source.colorPosition,
@@ -63,8 +75,10 @@ export function sanitizeFileName(name: string): string {
 }
 
 export const layoutModes: LayoutMode[] = ["auto", "4:5", "1:1", "9:16", "16:9", "3:4", "2:3"];
+export const compositionModes: CompositionMode[] = ["poster", "calendar"];
 export const fieldModes: FieldMode[] = ["compact", "balanced", "poster"];
 export const colorPositions: ColorPosition[] = ["auto", "top", "bottom", "left", "right"];
+export { calendarIcons };
 export const fitModes: FitMode[] = ["contain", "cover"];
 export const textColorModes: TextColorMode[] = ["auto", "ink", "paper"];
 

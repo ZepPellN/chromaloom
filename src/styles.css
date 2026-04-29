@@ -436,6 +436,10 @@ h3 {
   grid-template-columns: 1fr 1fr;
 }
 
+.field-grid.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .swatches {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

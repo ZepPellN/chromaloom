@@ -6,7 +6,7 @@ The user wants a lightweight static web tool for turning uploaded images into qu
 
 ## Solution
 
-Chromaloom is a browser-only poster maker. A user uploads one or up to nine images, each image gets a ranked palette of background candidates, and the app recommends the color most suitable for a large comfortable text field. The user edits a single title, chooses a font treatment, adjusts image fit, color-field size, and color-field position, then exports one PNG or all posters as a zip. The default layout keeps the original image uncropped in Auto mode; template modes adjust the whole poster frame to platform-oriented ratios while keeping the image area proportional to the source.
+Chromaloom is a browser-only poster maker. A user uploads one or up to nine images, each image gets a ranked palette of background candidates, and the app recommends the color most suitable for a large comfortable text field. The user edits a single title, chooses a font treatment, adjusts image fit, color-field size, and color-field position, then exports one PNG or all posters as a zip. Calendar mode turns the color area into a month grid, infers the image date from browser-readable metadata or the filename, lets the user correct the date, and marks the selected day with a lightweight icon. The default layout keeps the original image uncropped in Auto mode; template modes adjust the whole poster frame to platform-oriented ratios while keeping the image area proportional to the source.
 
 ## User Stories
 
@@ -22,18 +22,21 @@ Chromaloom is a browser-only poster maker. A user uploads one or up to nine imag
 10. As a creator, I want Contain as the default image fit, so that no source content is cropped by surprise.
 11. As a creator, I want to move the color area to the top, bottom, left, or right, so that the composition can match the source image.
 12. As a creator, I want Cover mode with manual position and scale, so that I can create a more poster-like crop when desired.
-13. As a creator, I want to type a main title, so that I can label the place or subject.
-14. As a creator, I want basic font controls, so that the title can match the image mood.
-15. As a creator, I want automatic black or white title color, so that contrast remains acceptable.
-16. As a creator, I want the preview to match the exported PNG, so that I can trust what I see.
-17. As a creator, I want to export the selected poster as PNG, so that I can post or archive it.
-18. As a creator, I want to upload up to nine images, so that I can process a small set quickly.
-19. As a creator, I want each uploaded image to have independent settings, so that different images can have different titles and colors.
-20. As a creator, I want to apply the current title or style to all images, so that batch edits stay fast.
-21. As a creator, I want to export all posters, so that a small set can be downloaded in one action.
-22. As a privacy-conscious user, I want processing to happen locally, so that my images are not uploaded to a server.
-23. As a mobile user, I want the workspace to remain usable on a phone, so that I can make a poster from recent photos.
-24. As a maintainer, I want lint, unit tests, e2e tests, and build checks in CI, so that GitHub Pages deploys stay reliable.
+13. As a creator, I want a Calendar mode, so that the selected date can be shown as part of the poster.
+14. As a creator, I want the app to infer the calendar date when possible, so that recent photos become calendar posters quickly.
+15. As a creator, I want to edit year, month, day, and icon, so that metadata mistakes remain fixable.
+16. As a creator, I want to type a main title, so that I can label the place or subject.
+17. As a creator, I want basic font controls, so that the title can match the image mood.
+18. As a creator, I want automatic black or white title color, so that contrast remains acceptable.
+19. As a creator, I want the preview to match the exported PNG, so that I can trust what I see.
+20. As a creator, I want to export the selected poster as PNG, so that I can post or archive it.
+21. As a creator, I want to upload up to nine images, so that I can process a small set quickly.
+22. As a creator, I want each uploaded image to have independent settings, so that different images can have different titles and colors.
+23. As a creator, I want to apply the current title or style to all images, so that batch edits stay fast.
+24. As a creator, I want to export all posters, so that a small set can be downloaded in one action.
+25. As a privacy-conscious user, I want processing to happen locally, so that my images are not uploaded to a server.
+26. As a mobile user, I want the workspace to remain usable on a phone, so that I can make a poster from recent photos.
+27. As a maintainer, I want lint, unit tests, e2e tests, and build checks in CI, so that GitHub Pages deploys stay reliable.
 
 ## Implementation Decisions
 
@@ -44,6 +47,7 @@ Chromaloom is a browser-only poster maker. A user uploads one or up to nine imag
 - Encapsulate canvas rendering in a deep module used by preview and export paths to keep output consistent.
 - Support Auto layout plus common export frames: 4:5, 1:1, 9:16, 16:9, 3:4, and 2:3. Frame presets change the whole poster ratio; they do not stretch or squash the source image.
 - Support Auto, top, bottom, left, and right color-area placement. Manual placement takes precedence over exact frame matching when the two conflict.
+- Support Poster and Calendar composition modes. Calendar mode should infer dates from EXIF-like date strings, filename dates, or file modification dates, then let the user edit the date and icon.
 - Default image fit is Contain. Cover mode supports position and scale controls.
 - Default typography uses system Chinese serif options with editable size, weight, and font family.
 - Batch processing is capped at nine images.

@@ -57,6 +57,12 @@ test("creates and exports a poster from an uploaded image", async ({ page }) => 
   await expect(positionControls).toBeVisible();
   await positionControls.getByRole("button", { name: "bottom" }).click();
   await expect(positionControls.getByRole("button", { name: "bottom" })).toHaveClass(/active/);
+  const modeControls = page.locator("fieldset").filter({ hasText: "Mode" });
+  await modeControls.getByRole("button", { name: "calendar" }).click();
+  await expect(page.getByLabel("Year")).toBeVisible();
+  await expect(page.getByLabel("Month")).toBeVisible();
+  await expect(page.getByLabel("Day")).toBeVisible();
+  await expect(page.locator("fieldset").filter({ hasText: "Calendar icon" })).toBeVisible();
 
   await page.getByLabel("Title").fill("山西·青龙寺");
   await page.getByRole("button", { name: "4:5" }).click();

@@ -1,13 +1,16 @@
 import JSZip from "jszip";
 import { type ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { readableTextColor } from "./lib/color";
+import { inferCalendarDate, recommendCalendarIcon } from "./lib/calendar";
 import { extractThemeColorsFromImage, fileToImage, loadImageElement } from "./lib/image";
 import { renderPoster } from "./lib/renderPoster";
 import {
   DEFAULT_FONT,
   MAX_BATCH,
   applyStyleFrom,
+  calendarIcons,
   colorPositions,
+  compositionModes,
   createPosterItem,
   fieldModes,
   fitModes,
@@ -16,7 +19,7 @@ import {
   textColorModes,
   updatePosterSetting,
 } from "./lib/posterState";
-import type { ColorPosition, FieldMode, FitMode, LayoutMode, LoadedImage, PosterItem, TextColorMode } from "./types";
+import type { CalendarIcon, ColorPosition, CompositionMode, FieldMode, FitMode, LayoutMode, LoadedImage, PosterItem, TextColorMode } from "./types";
 
 const FONT_OPTIONS = [
   { label: "Songti", value: DEFAULT_FONT },
@@ -66,6 +69,7 @@ function App() {
         }
 
         try {
+          const calendarDate = await inferCalendarDate(file);
           const loaded = await fileToImage(file);
           const palette = extractThemeColorsFromImage(loaded.element);
           const item = createPosterItem({
@@ -75,6 +79,10 @@ function App() {
             naturalWidth: loaded.width,
             naturalHeight: loaded.height,
             palette,
+            calendarYear: calendarDate.year,
+            calendarMonth: calendarDate.month,
+            calendarDay: calendarDate.day,
+            calendarIcon: recommendCalendarIcon(file.name, palette),
           });
           nextItems.push(item);
           nextImages[item.id] = loaded;
@@ -471,6 +479,13 @@ function Controls({
         <h2>Poster settings</h2>
       </div>
 
+      <Segmented<CompositionMode>
+        label="Mode"
+        value={item.compositionMode}
+        values={compositionModes}
+        onChange={(value) => onChange(updatePosterSetting(item, "compositionMode", value))}
+      />
+
       <label className="field">
         <span>Title</span>
         <textarea
@@ -526,6 +541,50 @@ function Controls({
         values={colorPositions}
         onChange={(value) => onChange(updatePosterSetting(item, "colorPosition", value))}
       />
+
+      {item.compositionMode === "calendar" ? (
+        <>
+          <div className="field-grid three">
+            <label className="field">
+              <span>Year</span>
+              <input
+                type="number"
+                min="1900"
+                max="2100"
+                value={item.calendarYear}
+                onChange={(event) => onChange(updatePosterSetting(item, "calendarYear", Number(event.target.value)))}
+              />
+            </label>
+            <label className="field">
+              <span>Month</span>
+              <input
+                type="number"
+                min="1"
+                max="12"
+                value={item.calendarMonth}
+                onChange={(event) => onChange(updatePosterSetting(item, "calendarMonth", Number(event.target.value)))}
+              />
+            </label>
+            <label className="field">
+              <span>Day</span>
+              <input
+                type="number"
+                min="1"
+                max="31"
+                value={item.calendarDay}
+                onChange={(event) => onChange(updatePosterSetting(item, "calendarDay", Number(event.target.value)))}
+              />
+            </label>
+          </div>
+
+          <Segmented<CalendarIcon>
+            label="Calendar icon"
+            value={item.calendarIcon}
+            values={calendarIcons}
+            onChange={(value) => onChange(updatePosterSetting(item, "calendarIcon", value))}
+          />
+        </>
+      ) : null}
 
       <Segmented<FitMode>
         label="Photo fit"

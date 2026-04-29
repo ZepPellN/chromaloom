@@ -7,6 +7,7 @@ Build Chromaloom as a pure front-end poster maker for GitHub Pages. The product 
 ## Product Vocabulary
 
 - **Poster**: The exportable composition containing a color area and the source image.
+- **Calendar mode**: A poster composition that renders a month grid in the color area, highlights the inferred or user-edited day, and marks it with a lightweight local icon.
 - **Theme color**: A ranked color candidate extracted from the source image and suitable for a large background.
 - **Color area**: The area filled with the selected theme color. It can sit above, below, left, or right of the source image; Auto places it above landscape or square photos and to the right of portrait photos.
 - **Source image**: The uploaded image rendered without distortion.
@@ -19,6 +20,7 @@ Build Chromaloom as a pure front-end poster maker for GitHub Pages. The product 
 - Keep preview and export visually consistent by using shared layout and rendering code.
 - Use the Web Share API for mobile-friendly single-poster sharing, with a Ready download link as fallback.
 - Keep manual color-position controls secondary to image integrity: the source image area must preserve the original ratio.
+- Keep calendar features local-first: infer dates from browser-readable metadata and filenames, and keep icon recommendations editable rather than depending on AI.
 - Prefer small, testable pure modules for color extraction, poster layout, and state transforms.
 - Keep batch processing capped at nine images unless performance is explicitly revisited.
 - Use conventional commits: `feat`, `fix`, `docs`, `chore`, `test`.
