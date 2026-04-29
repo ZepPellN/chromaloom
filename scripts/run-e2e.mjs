@@ -1,22 +1,21 @@
 import { spawn } from "node:child_process";
+import { once } from "node:events";
 
 const baseUrl = "http://127.0.0.1:4173";
 
 await run("npm", ["run", "build"]);
 
-const server = spawn("npx", ["vite", "preview", "--host", "127.0.0.1", "--port", "4173"], {
-  stdio: ["ignore", "pipe", "pipe"],
+const server = spawn("./node_modules/.bin/vite", ["preview", "--host", "127.0.0.1", "--port", "4173"], {
+  detached: process.platform !== "win32",
+  stdio: "inherit",
   env: process.env,
 });
-
-server.stdout.on("data", (chunk) => process.stdout.write(chunk));
-server.stderr.on("data", (chunk) => process.stderr.write(chunk));
 
 try {
   await waitForServer(baseUrl, 30_000);
   await run("npx", ["playwright", "test", "--config", "playwright.config.ts"]);
 } finally {
-  server.kill("SIGTERM");
+  await stopServer(server);
 }
 
 function run(command, args) {
@@ -46,4 +45,24 @@ async function waitForServer(url, timeoutMs) {
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function stopServer(serverProcess) {
+  if (serverProcess.exitCode !== null || serverProcess.signalCode !== null) return;
+
+  if (process.platform === "win32") {
+    serverProcess.kill("SIGTERM");
+  } else {
+    process.kill(-serverProcess.pid, "SIGTERM");
+  }
+
+  await Promise.race([
+    once(serverProcess, "exit"),
+    sleep(5_000).then(() => {
+      if (serverProcess.exitCode === null && serverProcess.signalCode === null) {
+        if (process.platform === "win32") serverProcess.kill("SIGKILL");
+        else process.kill(-serverProcess.pid, "SIGKILL");
+      }
+    }),
+  ]);
 }
