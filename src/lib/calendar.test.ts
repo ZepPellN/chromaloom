@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseDateFromFileName, recommendCalendarIcon } from "./calendar";
+import { parseDateFromFileName, randomCalendarIcon, recommendCalendarIcon } from "./calendar";
 import type { ThemeColor } from "../types";
 
 const greenPalette: ThemeColor[] = [
@@ -24,5 +24,10 @@ describe("calendar helpers", () => {
   it("recommends an icon from filename before palette", () => {
     expect(recommendCalendarIcon("roadside-flower.jpg", greenPalette)).toBe("flower");
     expect(["flower", "star"]).toContain(recommendCalendarIcon("plain.jpg", greenPalette));
+  });
+
+  it("randomizes calendar markers without repeating the current concrete icon", () => {
+    expect(randomCalendarIcon("star", () => 0)).toBe("flower");
+    expect(randomCalendarIcon("auto", () => 0.99)).toBe("petal-star");
   });
 });

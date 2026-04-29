@@ -62,7 +62,10 @@ test("creates and exports a poster from an uploaded image", async ({ page }) => 
   await expect(page.getByLabel("Year")).toBeVisible();
   await expect(page.getByLabel("Month")).toBeVisible();
   await expect(page.getByLabel("Day")).toBeVisible();
-  await expect(page.locator("fieldset").filter({ hasText: "Calendar icon" })).toBeVisible();
+  const iconControls = page.locator("fieldset").filter({ hasText: "Calendar icon" });
+  await expect(iconControls).toBeVisible();
+  await page.getByRole("button", { name: "Shuffle SVG marker" }).click();
+  await expect(iconControls.locator("button.active")).toHaveText(/flower|star|sparkle|petal-star/);
 
   await page.getByLabel("Title").fill("山西·青龙寺");
   await page.getByRole("button", { name: "4:5" }).click();

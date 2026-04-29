@@ -1,7 +1,7 @@
 import JSZip from "jszip";
 import { type ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { readableTextColor } from "./lib/color";
-import { inferCalendarDate, recommendCalendarIcon } from "./lib/calendar";
+import { inferCalendarDate, randomCalendarIcon, recommendCalendarIcon } from "./lib/calendar";
 import { extractThemeColorsFromImage, fileToImage, loadImageElement } from "./lib/image";
 import { renderPoster } from "./lib/renderPoster";
 import {
@@ -583,6 +583,13 @@ function Controls({
             values={calendarIcons}
             onChange={(value) => onChange(updatePosterSetting(item, "calendarIcon", value))}
           />
+          <button
+            className="button ghost full"
+            type="button"
+            onClick={() => onChange(updatePosterSetting(item, "calendarIcon", randomCalendarIcon(item.calendarIcon)))}
+          >
+            Shuffle SVG marker
+          </button>
         </>
       ) : null}
 

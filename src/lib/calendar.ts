@@ -12,7 +12,8 @@ const FILENAME_DATE_PATTERNS = [
   /((?:19|20)\d{2})([01]\d)([0-3]\d)/,
 ];
 
-export const calendarIcons: CalendarIcon[] = ["auto", "flower", "star"];
+export const calendarIcons: CalendarIcon[] = ["auto", "flower", "star", "sparkle", "petal-star"];
+export const shuffleCalendarIcons: Exclude<CalendarIcon, "auto">[] = ["flower", "star", "sparkle", "petal-star"];
 
 export async function inferCalendarDate(file: File): Promise<CalendarDateParts> {
   const exifDate = await readExifDate(file);
@@ -51,6 +52,13 @@ export function resolveCalendarIcon(icon: CalendarIcon, fileName: string, palett
   if (icon !== "auto") return icon;
   const recommended = recommendCalendarIcon(fileName, palette);
   return recommended === "auto" ? stableDecorativeIcon(fileName) : recommended;
+}
+
+export function randomCalendarIcon(current: CalendarIcon, random: () => number = Math.random): Exclude<CalendarIcon, "auto"> {
+  const options = shuffleCalendarIcons.filter((icon) => icon !== current);
+  const pool = options.length ? options : shuffleCalendarIcons;
+  const index = Math.floor(random() * pool.length) % pool.length;
+  return pool[index];
 }
 
 function stableDecorativeIcon(seed: string): Exclude<CalendarIcon, "auto"> {

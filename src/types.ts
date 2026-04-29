@@ -3,7 +3,7 @@ export type LayoutMode = "auto" | "4:5" | "1:1" | "9:16" | "16:9" | "3:4" | "2:3
 export type FieldMode = "compact" | "balanced" | "poster";
 export type ColorPosition = "auto" | "top" | "bottom" | "left" | "right";
 export type CompositionMode = "poster" | "calendar";
-export type CalendarIcon = "auto" | "flower" | "star";
+export type CalendarIcon = "auto" | "flower" | "star" | "sparkle" | "petal-star";
 export type TextColorMode = "auto" | "ink" | "paper";
 
 export interface ThemeColor {

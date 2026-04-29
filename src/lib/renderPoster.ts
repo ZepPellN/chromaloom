@@ -193,7 +193,9 @@ function clampDay(year: number, monthIndex: number, day: number) {
 }
 
 function pickIconColor(item: PosterItem) {
-  if (resolveCalendarIcon(item.calendarIcon, item.fileName, item.palette) === "flower") return "#f3c83f";
+  const icon = resolveCalendarIcon(item.calendarIcon, item.fileName, item.palette);
+  if (icon === "flower") return "#f3c83f";
+  if (icon === "sparkle") return "#fff0a3";
   return "#f6d760";
 }
 
@@ -209,8 +211,8 @@ function drawCalendarIcon(
   context.lineCap = "round";
   context.lineJoin = "round";
 
-  if (icon === "flower") drawSvgLineIcon(context, FLOWER_ICON_PATH, x, y, size, color);
-  else drawSvgLineIcon(context, STAR_ICON_PATH, x, y, size, color);
+  const path = CALENDAR_ICON_PATHS[icon];
+  drawSvgLineIcon(context, path, x, y, size, color);
 
   context.restore();
 }
@@ -223,6 +225,26 @@ const FLOWER_ICON_PATH =
   "M12 12 m-1.7 0 a1.7 1.7 0 1 0 3.4 0 a1.7 1.7 0 1 0 -3.4 0";
 
 const STAR_ICON_PATH = "M12 3.6 L14.2 9 L20 9.4 L15.5 13.1 L16.9 18.8 L12 15.7 L7.1 18.8 L8.5 13.1 L4 9.4 L9.8 9 Z";
+
+const SPARKLE_ICON_PATH =
+  "M12 4.2 C12.7 8.1 14 9.3 17.8 10 C14 10.7 12.7 12 12 15.8 " +
+  "C11.3 12 10 10.7 6.2 10 C10 9.3 11.3 8.1 12 4.2 Z " +
+  "M18.8 15.4 C19.1 16.9 19.6 17.4 21.1 17.7 C19.6 18 19.1 18.5 18.8 20 " +
+  "C18.5 18.5 18 18 16.5 17.7 C18 17.4 18.5 16.9 18.8 15.4 Z " +
+  "M5.4 16.8 L5.5 16.8 M6.9 5.5 L7 5.5";
+
+const PETAL_STAR_ICON_PATH =
+  "M12 3.7 C13.1 6.9 14.8 8.6 18.1 9.7 C15.2 11.3 14 13.5 14 16.9 " +
+  "C11.5 14.7 9.2 14.1 6 15.1 C7.3 12 7.1 9.5 5.2 6.8 C8.6 7.1 10.7 6.2 12 3.7 Z " +
+  "M12 8.2 C12.4 9.5 13.1 10.2 14.4 10.7 C13.2 11.3 12.7 12.2 12.7 13.6 " +
+  "C11.7 12.7 10.7 12.5 9.4 12.9 C10 11.6 9.9 10.6 9.1 9.5 C10.5 9.6 11.4 9.2 12 8.2 Z";
+
+const CALENDAR_ICON_PATHS: Record<Exclude<PosterItem["calendarIcon"], "auto">, string> = {
+  flower: FLOWER_ICON_PATH,
+  star: STAR_ICON_PATH,
+  sparkle: SPARKLE_ICON_PATH,
+  "petal-star": PETAL_STAR_ICON_PATH,
+};
 
 function drawSvgLineIcon(context: CanvasRenderingContext2D, svgPath: string, x: number, y: number, size: number, color: string) {
   const path = new Path2D(svgPath);
