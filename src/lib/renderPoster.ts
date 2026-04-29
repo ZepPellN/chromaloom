@@ -115,7 +115,7 @@ function drawCalendar(context: CanvasRenderingContext2D, item: PosterItem, layou
     context.fillText(String(day).padStart(2, "0"), x, y);
 
     if (day === safeDay) {
-      drawCalendarIcon(context, resolveCalendarIcon(item.calendarIcon, item.fileName, item.palette), x + daySize * 0.72, y + daySize * 0.16, daySize * 0.42, iconColor);
+      drawCalendarIcon(context, resolveCalendarIcon(item.calendarIcon, item.fileName, item.palette), x + daySize * 0.78, y + daySize * 0.02, daySize * 0.82, iconColor);
     }
   }
 
@@ -205,42 +205,37 @@ function drawCalendarIcon(
   color: string,
 ) {
   context.save();
-  context.strokeStyle = color;
-  context.fillStyle = color;
-  context.lineWidth = Math.max(2, size * 0.12);
   context.lineCap = "round";
   context.lineJoin = "round";
 
-  if (icon === "flower") drawFlower(context, x, y, size, color);
-  else drawStar(context, x, y, size);
+  if (icon === "flower") drawSvgLineIcon(context, FLOWER_ICON_PATH, x, y, size, color);
+  else drawSvgLineIcon(context, STAR_ICON_PATH, x, y, size, color);
 
   context.restore();
 }
 
-function drawFlower(context: CanvasRenderingContext2D, x: number, y: number, size: number, color: string) {
-  const petal = size * 0.34;
-  for (let index = 0; index < 8; index += 1) {
-    const angle = (Math.PI * 2 * index) / 8;
-    context.beginPath();
-    context.ellipse(x + Math.cos(angle) * petal, y + Math.sin(angle) * petal, petal * 0.42, petal * 0.72, angle, 0, Math.PI * 2);
-    context.fill();
-  }
-  context.fillStyle = color === "#f3c83f" ? "#7a5a13" : color;
-  context.beginPath();
-  context.arc(x, y, size * 0.16, 0, Math.PI * 2);
-  context.fill();
-}
+const FLOWER_ICON_PATH =
+  "M12 12 C8.7 8.7 8.3 5.8 10 4.4 C11.4 3.2 13.2 4.2 12 12 " +
+  "C15.3 8.7 18.2 8.3 19.6 10 C20.8 11.4 19.8 13.2 12 12 " +
+  "C15.3 15.3 15.7 18.2 14 19.6 C12.6 20.8 10.8 19.8 12 12 " +
+  "C8.7 15.3 5.8 15.7 4.4 14 C3.2 12.6 4.2 10.8 12 12 " +
+  "M12 12 m-1.7 0 a1.7 1.7 0 1 0 3.4 0 a1.7 1.7 0 1 0 -3.4 0";
 
-function drawStar(context: CanvasRenderingContext2D, x: number, y: number, size: number) {
-  context.beginPath();
-  for (let point = 0; point < 10; point += 1) {
-    const radius = point % 2 === 0 ? size * 0.62 : size * 0.27;
-    const angle = -Math.PI / 2 + point * (Math.PI / 5);
-    const px = x + Math.cos(angle) * radius;
-    const py = y + Math.sin(angle) * radius;
-    if (point === 0) context.moveTo(px, py);
-    else context.lineTo(px, py);
-  }
-  context.closePath();
-  context.fill();
+const STAR_ICON_PATH = "M12 3.6 L14.2 9 L20 9.4 L15.5 13.1 L16.9 18.8 L12 15.7 L7.1 18.8 L8.5 13.1 L4 9.4 L9.8 9 Z";
+
+function drawSvgLineIcon(context: CanvasRenderingContext2D, svgPath: string, x: number, y: number, size: number, color: string) {
+  const path = new Path2D(svgPath);
+  const scale = size / 24;
+
+  context.save();
+  context.translate(x - size / 2, y - size / 2);
+  context.scale(scale, scale);
+  context.fillStyle = "transparent";
+  context.strokeStyle = "rgba(0, 0, 0, 0.34)";
+  context.lineWidth = 3.8;
+  context.stroke(path);
+  context.strokeStyle = color;
+  context.lineWidth = 2.45;
+  context.stroke(path);
+  context.restore();
 }
